@@ -1,75 +1,46 @@
 // Docco
 // =====
 
-// **Docco** is a quick-and-dirty documentation generator, written in
-// [Literate CoffeeScript](http://coffeescript.org/#literate).
+// **Docco-ES** is a quick-and-simple documentation generator, written in
+// [modern, ES2015+, JavaScript](https://babeljs.io/learn-es2015/).
+//
 // It produces an HTML document that displays your comments intermingled with your
 // code. All prose is passed through
 // [Markdown](http://daringfireball.net/projects/markdown/syntax), and code is
-// passed through [Highlight.js](http://highlightjs.org/) syntax highlighting.
-// This page is the result of running Docco against its own
-// [source file](https://github.com/jashkenas/docco/blob/master/docco.litcoffee).
+// passed through [Highlight.js](http://highlightjs.org/) for syntax highlighting.
+//
+// This page is actually the result of running Docco against its own
+// [source file](https://github.com/abritinthebay/docco-es/blob/master/docco.js).
 
-// 1. Install Docco with **npm**: `sudo npm install -g docco`
+// 1. Install Docco with **npm**: `npm install -g docco`
+// 2. Run it against your code: `docco src/*.js`
 
-// 2. Run it against your code: `docco src/*.coffee`
+// There is no Step 3.
 
-// There is no "Step 3". This will generate an HTML page for each of the named
+// This will generate an HTML page for each of the named
 // source files, with a menu linking to the other pages, saving the whole mess
 // into a `docs` folder (configurable).
 
-// The [Docco source](http://github.com/jashkenas/docco) is available on GitHub,
-// and is released under the [Lil License](http://lillicense.org/v1.html).
+// The [Docco-ES source](http://github.com/abritinthebay/docco-es) is available on GitHub,
+// and is released under the MIT License.
 
 // Docco can be used to process code written in any programming language. If it
 // doesn't handle your favorite yet, feel free to
-// [add it to the list](https://github.com/jashkenas/docco/blob/master/resources/languages.json).
+// [add it to the list](https://github.com/abritinthebay/docco-es/blob/master/resources/languages.json).
 // Finally, the ["literate" style](http://coffeescript.org/#literate) of *any*
 // language is also supported — just tack an `.md` extension on the end:
-// `.coffee.md`, `.py.md`, and so on.
+// `.js.md`, `.py.md`, and so on.
 
 // Partners in Crime:
 // ------------------
-
-// * If Node.js doesn't run on your platform, or you'd prefer a more
-// convenient package, get [Ryan Tomayko](http://github.com/rtomayko)'s
-// [Rocco](http://rtomayko.github.io/rocco/rocco.html), the **Ruby** port that's
-// available as a gem.
-
-// * If you're writing shell scripts, try
-// [Shocco](http://rtomayko.github.io/shocco/), a port for the **POSIX shell**,
-// also by Mr. Tomayko.
-
-// * If **Python** is more your speed, take a look at
-// [Nick Fitzgerald](http://github.com/fitzgen)'s [Pycco](https://pycco-docs.github.io/pycco/).
-
-// * For **Clojure** fans, [Fogus](http://blog.fogus.me/)'s
-// [Marginalia](http://fogus.me/fun/marginalia/) is a bit of a departure from
-// "quick-and-dirty", but it'll get the job done.
-
-// * There's a **Go** port called [Gocco](http://nikhilm.github.io/gocco/),
-// written by [Nikhil Marathe](https://github.com/nikhilm).
-
-// * For all you **PHP** buffs out there, Fredi Bach's
-// [sourceMakeup](http://jquery-jkit.com/sourcemakeup/) (we'll let the faux pas
-// with respect to our naming scheme slide), should do the trick nicely.
-
-// * **Lua** enthusiasts can get their fix with
-// [Robert Gieseke](https://github.com/rgieseke)'s [Locco](http://rgieseke.github.io/locco/).
-
-// * And if you happen to be a **.NET**
-// aficionado, check out [Don Wilson](https://github.com/dontangg)'s
-// [Nocco](http://dontangg.github.io/nocco/).
-
-// * Going further afield from the quick-and-dirty, [Groc](http://nevir.github.io/groc/)
-// is a **CoffeeScript** fork of Docco that adds a searchable table of contents,
-// and aims to gracefully handle large projects with complex hierarchies of code.
-
-// Note that not all ports will support all Docco features ... yet.
+//
+// Docco-ES is based on the excellent work of Jeremy Ashkenas who wrote the [original Docco](https://github.com/jashkenas/docco)
+// in CoffeeScript. This fork was created to add features and to work with modern JS technologies
+// and language features that didn't exist when it was original written or that
+// CoffeeScript does not support.
 
 // Main Documentation Generation Functions
 // ---------------------------------------
-
 // Generate the documentation for our configured source file by copying over static
 // assets, reading all the source files in, splitting them up into prose+code
 // sections, highlighting each file in the appropriate language, and printing them
