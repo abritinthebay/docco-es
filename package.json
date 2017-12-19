@@ -1,5 +1,5 @@
 {
-  "name": "docco",
+  "name": "docco-es",
   "description": "A Modern Literate Programming Documentation Generator",
   "keywords": [
     "documentation",
@@ -23,15 +23,20 @@
     "node": ">=8.6.0"
   },
   "dependencies": {
+    "@std/esm": "^0.18.0",
     "commander": ">= 0.5.2",
-    "marked": ">= 0.2.7",
     "fs-extra": ">= 0.6.0",
-    "underscore": ">= 1.0.0",
-    "highlight.js": ">= 8.0.x"
+    "highlight.js": ">= 8.0.x",
+    "marked": ">= 0.2.7",
+    "underscore": ">= 1.0.0"
   },
-  "main": "./docco",
+  "main": "./index.js",
   "bin": {
     "docco": "./bin/docco"
+  },
+  "@std/esm": {
+    "esm": "js",
+    "cjs": true
   },
   "devDependencies": {
     "babel-eslint": "^8.0.3",
