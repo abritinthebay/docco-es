@@ -1,22 +1,26 @@
 {
   "name": "docco",
-  "description": "The Quick and Dirty Literate Programming Documentation Generator",
+  "description": "A Modern Literate Programming Documentation Generator",
   "keywords": [
     "documentation",
     "docs",
+    "generate",
     "generator",
     "literate",
-    "coffeescript"
+    "javascript",
+    "es6",
+    "es2015",
+    "ecmascript"
   ],
-  "author": "Jeremy Ashkenas",
-  "version": "0.7.0",
+  "author": "Gregory Wild-Smith",
+  "version": "1.0.0",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jashkenas/docco.git"
+    "url": "https://github.com/abritinthebay/docco-es.git"
   },
   "engines": {
-    "node": ">=0.2.0"
+    "node": ">=8.6.0"
   },
   "dependencies": {
     "commander": ">= 0.5.2",
@@ -28,5 +32,10 @@
   "main": "./docco",
   "bin": {
     "docco": "./bin/docco"
+  },
+  "devDependencies": {
+    "babel-eslint": "^8.0.3",
+    "eslint": "^4.13.1",
+    "eslint-plugin-babel": "^4.1.2"
   }
 }
