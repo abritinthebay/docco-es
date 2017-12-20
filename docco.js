@@ -185,7 +185,15 @@ export const format = function(source, sections, config = {}) {
 	});
 
 	return sections.map((section) => {
-		let code = highlightjs.highlight(language.name, section.codeText).value;
+		let code;
+		try {
+			code = highlightjs.highlight(language.name, section.codeText).value;
+		} catch (err) {
+			if (config.throw) {
+				throw err;
+			}
+			code = section.codeText;
+		}
 		code = code.replace(/\s+$/, "");
 		section.codeHtml = `<div class='highlight'><pre>${code}</pre></div>`;
 		section.docsHtml = marked(section.docsText);
@@ -239,13 +247,14 @@ const write = function(source, sections, config) {
 // Default configuration **options**. All of these may be extended by
 // user-specified options.
 const defaults = {
-	layout: "parallel",
-	output: "docs",
-	template: null,
 	css: null,
 	extension: null,
 	languages: {},
-	marked: null
+	layout: "parallel",
+	marked: null,
+	output: "docs",
+	template: null,
+	throw: false
 };
 
 // **Configure** this particular run of Docco. We might use a passed-in external
@@ -348,6 +357,7 @@ export const run = function(args = process.argv) {
 		.option("-t, --template [file]", "use a custom .jst template", defaults.template)
 		.option("-e, --extension [ext]", "assume a file extension for all inputs", defaults.extension)
 		.option("-m, --marked [file]", "use custom marked options", defaults.marked)
+		.option("-T, --throw", "throw errors if code syntax highlighting fails", defaults.throw)
 		.parse(args).name = "docco";
 	if (commander.args.length) {
 		return document(commander);
