@@ -219,14 +219,15 @@ const write = function(source, sections, config) {
 	title = hasTitle ? first.text : path.basename(source);
 	css = relative(path.join(config.output, path.basename(config.css)));
 	html = config.template({
-		sources: config.sources,
 		css,
-		title,
-		hasTitle,
-		sections,
-		path,
 		destination,
-		relative
+		hasTitle,
+		language: getLanguage(source, config),
+		path,
+		relative,
+		sections,
+		sources: config.sources,
+		title
 	});
 	global.console.log(`docco: ${source} -> ${destination(source)}`);
 	return fs.outputFileSync(destination(source), html);
