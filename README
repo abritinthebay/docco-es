@@ -15,7 +15,7 @@ http://abritinthebay.github.com/docco-es/
 
 Installation:
 
-	sudo npm install -g docco
+	sudo npm install -g docco-es
 
 Usage: docco [options] FILES
 
