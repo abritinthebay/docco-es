@@ -1,9 +1,11 @@
+# Docco Markdown
+
 This is a simple plain-markdown template.
 
 It can be used to convert your docco output even further,
 for example to output to PDF via `LaTeX` with [`pandoc`][pandoc].
 
-The resulting markdown uses code fences (<code>```</code>),
+The resulting markdown uses code fences (\```),
 which is compatible with Github- and pandoc-flavoured markdown.
 
 Example PDF output:
@@ -35,9 +37,9 @@ An full-fledged scientific-looking PDF could use these options:
 This is as quick-and-dirty as the original docco,
 so there are some **bugs**:
 
-- The code blocks don't always fit on paper (if the lines are too long). This is a serious issue, but could be fixed "easily" in [pandoc's LaTeX template][] (where "easy" is relative, as always when dealing with LaTeX)
+- The code blocks don't always fit on paper (if the lines are too long). This is a serious issue, but could be fixed "easily" in [pandoc's LaTeX template](http://pandoc.org/) (where "easy" is relative, as always when dealing with LaTeX)
 
-- No syntax higlighting. Could maybe built into the template -- it would be just a matter of printing something like <code>````javascript</code> as the start of each code fence.
+- No syntax higlighting. Could maybe built into the template -- it would be just a matter of printing something like \````javascript as the start of each code fence.
 
 - The plaintext output file is markdown, but the filename has .html (not really important since it is just an intermediary file)
 
