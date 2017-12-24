@@ -283,6 +283,7 @@ const configure = function(options) {
 		}
 		config.layout = null;
 	} else {
+		config.layoutname = config.layout;
 		dir = config.layout = path.join(__dirname, "resources", config.layout);
 		if (fs.existsSync(path.join(dir, "public"))) {
 			config.public = path.join(dir, "public");
