@@ -188,7 +188,8 @@ export const format = function(source, sections, config = {}) {
 		}
 	});
 
-	return sections.map((section) => {
+	// making sure this is an immutable operation by cloning sections.
+	return [...sections].map((section) => {
 		let code;
 		try {
 			code = highlightjs.highlight(language.name, section.codeText).value;
@@ -201,7 +202,7 @@ export const format = function(source, sections, config = {}) {
 		code = code.replace(/\s+$/, "");
 		section.codeHtml = `<div class='highlight'><pre>${code}</pre></div>`;
 		section.docsHtml = marked(section.docsText);
-		return section.docsHtml;
+		return section;
 	});
 };
 
