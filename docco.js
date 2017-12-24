@@ -348,6 +348,15 @@ export const document = function(options = {}, callback = errorCallback) {
 // Finally, let's define the interface to run Docco from the command line.
 // Parse options using [Commander](https://github.com/visionmedia/commander.js).
 export const run = function(args = process.argv) {
+	global.console.log(`
+	       __
+	  ____/ /___  ______________        ___  _____
+	 / __  / __ \\/ ___/ ___/ __ \\______/ _ \\/ ___/
+	/ /_/ / /_/ / /__/ /__/ /_/ /_____/  __(__  )
+	\\__,_/\\____/\\___/\\___/\\____/      \\___/____/
+
+   The Quick & Simple Literate Doccumentation Generator
+	`);
 	commander.version(version)
 		.usage("[options] files")
 		.option("-L, --languages [file]", "use a custom languages.json", underscore.compose(JSON.parse, fs.readFileSync))
