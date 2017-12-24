@@ -210,11 +210,13 @@ export const format = function(source, sections, config = {}) {
 // documentation file by passing the completed HTML sections into the template,
 // and rendering it to the specified output path.
 const write = function(source, sections, config) {
-	var css, destination, first, firstSection, hasTitle, html, relative, title;
-	destination = function(file) {
-		return path.join(config.output, path.dirname(file), `${path.basename(file, path.extname(file)) }.html`);
+	// var css, destination, first, firstSection, hasTitle, html, relative, title;
+	const destination = function(file) {
+		const lang = getLanguage(source, config);
+		const ext = lang && lang.name === "markdown" ? "md" : "html";
+		return path.join(config.output, path.dirname(file), `${path.basename(file, path.extname(file)) }.${ext}`);
 	};
-	relative = function(file) {
+	const relative = function(file) {
 		var from, to;
 		to = path.dirname(path.resolve(file));
 		from = path.dirname(path.resolve(destination(source)));
@@ -222,24 +224,25 @@ const write = function(source, sections, config) {
 	};
 	// The **title** of the file is either the first heading in the prose, or the
 	// name of the source file.
-	firstSection = underscore.find(sections, function(section) {
-		return section.docsText.length > 0;
+	const firstSection = underscore.find(sections, function(section) {
+		return section.docsText && section.docsText.length > 0;
 	});
-	if (firstSection) {
-		first = marked.lexer(firstSection.docsText)[0];
-	}
-	hasTitle = first && first.type === "heading" && first.depth === 1;
-	title = hasTitle ? first.text : path.basename(source);
-	css = relative(path.join(config.output, path.basename(config.css)));
-	html = config.template({
+	const first = firstSection ? marked.lexer(firstSection.docsText)[0] : {};
+	const hasTitle = first.type === "heading" && first.depth === 1;
+	const title = hasTitle ? first.text : path.basename(source);
+	const css = relative(path.join(config.output, path.basename(config.css)));
+	const language = getLanguage(source, config);
+	const sources = config.sources;
+
+	const html = config.template({
 		css,
 		destination,
 		hasTitle,
-		language: getLanguage(source, config),
+		language,
 		path,
 		relative,
 		sections,
-		sources: config.sources,
+		sources,
 		title
 	});
 
