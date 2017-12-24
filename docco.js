@@ -242,7 +242,10 @@ const write = function(source, sections, config) {
 		sources: config.sources,
 		title
 	});
+
+	if (config.verbose) {
 	global.console.log(`docco: ${source} -> ${destination(source)}`);
+	}
 	return fs.outputFileSync(destination(source), html);
 };
 
@@ -259,7 +262,8 @@ const defaults = {
 	marked: null,
 	output: "docs",
 	template: null,
-	throw: false
+	throw: false,
+	verbose: false
 };
 
 // **Configure** this particular run of Docco. We might use a passed-in external
@@ -372,6 +376,7 @@ export const run = function(args = process.argv) {
 		.option("-e, --extension [ext]", "assume a file extension for all inputs", defaults.extension)
 		.option("-m, --marked [file]", "use custom marked options", defaults.marked)
 		.option("-T, --throw", "throw errors if code syntax highlighting fails", defaults.throw)
+		.option("-v, --verbose", "shows all files as they are proccessed rather than a summary", defaults.verbose)
 		.parse(args).name = "docco";
 	if (commander.args.length) {
 		return document(commander);
