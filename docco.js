@@ -49,12 +49,16 @@
 // Helpers & Initial Setup
 // -----------------------
 // Require our external dependencies.
+import {promisify} from "util";
 import underscore from "underscore";
 import fs from "fs-extra";
 import path from "path";
 import marked from "marked";
 import commander from "commander";
 import highlightjs from "highlight.js";
+
+// Simple Promisified version of the Node fs.readFile. Useful for async batching.
+const readFileAsync = promisify(fs.readFile);
 
 // Languages are stored in JSON in the file `resources/languages.json`.
 // Each item maps the file extension to the name of the language and the
