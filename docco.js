@@ -148,7 +148,7 @@ export const parse = function(source, code, config = {}) {
 
 	const docsRegex = /^(---+|===+)$/;
 	for (const line of lines) {
-		if (line.match(lang.commentMatcher) && !line.match(lang.commentFilter)) {
+		if (line && line.match(lang.commentMatcher) && !line.match(lang.commentFilter)) {
 			if (hasCode) {
 				save();
 			}
