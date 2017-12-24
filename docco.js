@@ -291,7 +291,12 @@ const configure = function(options) {
 		config.template = path.join(dir, "docco.jst");
 		config.css = options.css || path.join(dir, "docco.css");
 	}
+	try {
 	config.template = underscore.template(fs.readFileSync(config.template).toString());
+	} catch (err) {
+		global.console.log(`docco: could not load layout "${config.layoutname}", aborting`);
+		process.exit(!!err); // eslint-disable-line no-process-exit
+	}
 	if (options.marked) {
 		config.marked = JSON.parse(fs.readFileSync(options.marked));
 	}
