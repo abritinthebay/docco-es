@@ -23,12 +23,12 @@
     "node": ">=8.6.0"
   },
   "dependencies": {
-    "@std/esm": "^0.18.0",
-    "commander": ">= 0.5.2",
-    "fs-extra": ">= 0.6.0",
-    "highlight.js": ">= 8.0.x",
-    "marked": ">= 0.2.7",
-    "underscore": ">= 1.0.0"
+    "@std/esm": "0.18.0",
+    "commander": "2.12.2",
+    "fs-extra": "5.0.0",
+    "highlight.js": "9.12.0",
+    "marked": "0.3.9",
+    "underscore": "1.8.3"
   },
   "main": "./index.js",
   "bin": {
@@ -39,8 +39,8 @@
     "cjs": true
   },
   "devDependencies": {
-    "babel-eslint": "^8.0.3",
-    "eslint": "^4.13.1",
-    "eslint-plugin-babel": "^4.1.2"
+    "babel-eslint": "8.1.0",
+    "eslint": "4.14.0",
+    "eslint-plugin-babel": "4.1.2"
   }
 }
