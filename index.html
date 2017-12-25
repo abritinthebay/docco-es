@@ -3,9 +3,9 @@
 <html>
 <head>
   <title>Docco</title>
-  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
-  <link rel="stylesheet" media="all" href="resources/linear/docco.css" />
+  <meta charset="UTF-8">
+  <link rel="stylesheet" media="all" href="docs/public/stylesheets/normalize.css" />
+  <link rel="stylesheet" media="all" href="docs/docco.css" />
 </head>
 <body>
   <div class="container">
@@ -19,6 +19,76 @@
 
 
 
+
+          <div class="toc">
+            <h3>Table of Contents</h3>
+            <ol>
+
+
+                <li>
+                  <a class="source" href="cli.html">
+                    lib/cli.js
+                  </a>
+                </li>
+
+
+                <li>
+                  <a class="source" href="configure.html">
+                    lib/configure.js
+                  </a>
+                </li>
+
+
+                <li>
+                  <a class="source" href="defaults.html">
+                    lib/defaults.js
+                  </a>
+                </li>
+
+
+                <li>
+                  <a class="source" href="docco.html">
+                    lib/docco.js
+                  </a>
+                </li>
+
+
+                <li>
+                  <a class="source" href="document.html">
+                    lib/document.js
+                  </a>
+                </li>
+
+
+                <li>
+                  <a class="source" href="format.html">
+                    lib/format.js
+                  </a>
+                </li>
+
+
+                <li>
+                  <a class="source" href="languages.html">
+                    lib/languages.js
+                  </a>
+                </li>
+
+
+                <li>
+                  <a class="source" href="parse.html">
+                    lib/parse.js
+                  </a>
+                </li>
+
+
+                <li>
+                  <a class="source" href="write.html">
+                    lib/write.js
+                  </a>
+                </li>
+
+            </ol>
+          </div>
 
       </div>
 
@@ -81,412 +151,51 @@ CoffeeScript does not support.</p>
 
 
 
-        <h2 id="main-documentation-generation-functions">Main Documentation Generation Functions</h2>
-<p>Generate the documentation for our configured source file by copying over static
-assets, reading all the source files in, splitting them up into prose+code
-sections, highlighting each file in the appropriate language, and printing them
-out in an HTML template.</p>
+        <h2 id="how-we-generation-documentation">How We Generation Documentation</h2>
+<p>We generate the documentation for our configured source file(s) by:</p>
+<ul>
+<li>copying over static assets</li>
+<li>reading all the source files in</li>
+<li>splitting them up into prose/code sections</li>
+<li>highlighting each file in the appropriate language</li>
+<li>printing them out in a template</li>
+</ul>
 
 
 
 
-        <h2 id="helpers-initial-setup">Helpers &amp; Initial Setup</h2>
-<p>Require our external dependencies.</p>
+        <h2 id="and-now-the-code-">And Now, The Code.</h2>
 
 
-          <div class='highlight'><pre><span class="hljs-keyword">import</span> underscore <span class="hljs-keyword">from</span> <span class="hljs-string">"underscore"</span>;
-<span class="hljs-keyword">import</span> fs <span class="hljs-keyword">from</span> <span class="hljs-string">"fs-extra"</span>;
-<span class="hljs-keyword">import</span> path <span class="hljs-keyword">from</span> <span class="hljs-string">"path"</span>;
-<span class="hljs-keyword">import</span> marked <span class="hljs-keyword">from</span> <span class="hljs-string">"marked"</span>;
-<span class="hljs-keyword">import</span> commander <span class="hljs-keyword">from</span> <span class="hljs-string">"commander"</span>;
-<span class="hljs-keyword">import</span> highlightjs <span class="hljs-keyword">from</span> <span class="hljs-string">"highlight.js"</span>;</pre></div>
 
 
+        <p>First require our internal dependencies.</p>
 
-        <p>Languages are stored in JSON in the file <code>resources/languages.json</code>.
-Each item maps the file extension to the name of the language and the
-<code>symbol</code> that indicates a line comment. To add support for a new programming
-language to Docco, just add it to the file.</p>
 
+          <div class='highlight'><pre><span class="hljs-keyword">import</span> parse <span class="hljs-keyword">from</span> <span class="hljs-string">"./parse"</span>;
+<span class="hljs-keyword">import</span> format <span class="hljs-keyword">from</span> <span class="hljs-string">"./format"</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-built_in">document</span> <span class="hljs-keyword">from</span> <span class="hljs-string">"./document"</span>;
+<span class="hljs-keyword">import</span> cli <span class="hljs-keyword">from</span> <span class="hljs-string">"./cli"</span>;
+<span class="hljs-keyword">import</span> {version} <span class="hljs-keyword">from</span> <span class="hljs-string">"./cli"</span>;</pre></div>
 
-          <div class='highlight'><pre><span class="hljs-keyword">const</span> unparsedLanguages = <span class="hljs-built_in">JSON</span>.parse(fs.readFileSync(path.join(__dirname, <span class="hljs-string">"resources"</span>, <span class="hljs-string">"languages.json"</span>)));</pre></div>
 
 
+        <p>Then export our public API.</p>
 
-        <p>Build out the appropriate matchers and delimiters for each language.</p>
 
-
-          <div class='highlight'><pre><span class="hljs-keyword">const</span> buildMatchers = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">languages</span>) </span>{
-	<span class="hljs-keyword">return</span> <span class="hljs-built_in">Object</span>.entries(languages).reduce(<span class="hljs-function">(<span class="hljs-params">acc, [extension, lang]</span>) =&gt;</span> {</pre></div>
-
-
-
-        <p>Does the line begin with a comment?</p>
-
-
-          <div class='highlight'><pre>		lang.commentMatcher = <span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(<span class="hljs-string">`^\\s*<span class="hljs-subst">${lang.symbol}</span>\\s?`</span>);</pre></div>
-
-
-
-        <p>Ignore Shebangs/Hashbangs and interpolations</p>
-
-
-          <div class='highlight'><pre>		lang.commentFilter = <span class="hljs-regexp">/(^#![/]|^\s*#\{)/</span>;
-		acc[extension] = lang;
-		<span class="hljs-keyword">return</span> acc;
-	}, {});
-};
-
-<span class="hljs-keyword">const</span> languages = buildMatchers(unparsedLanguages);</pre></div>
-
-
-
-        <p>A function to get the current language we’re documenting, based on the
-file extension. Detect and tag “literate” <code>.ext.md</code> variants.</p>
-
-
-          <div class='highlight'><pre><span class="hljs-keyword">const</span> getLanguage = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">source, config</span>) </span>{
-	<span class="hljs-keyword">const</span> ext = config.extension || path.extname(source) || path.basename(source);
-	<span class="hljs-keyword">const</span> ref = config.languages;
-	<span class="hljs-keyword">const</span> lang = (ref !== <span class="hljs-literal">null</span> ? ref[ext] : <span class="hljs-literal">false</span>) || languages[ext];
-	<span class="hljs-keyword">if</span> (lang &amp;&amp; lang.name === <span class="hljs-string">"markdown"</span>) {
-		<span class="hljs-keyword">const</span> codeExt = path.extname(path.basename(source, ext));
-		<span class="hljs-keyword">const</span> codeLang = languages[codeExt];
-		<span class="hljs-keyword">if</span> (codeExt &amp;&amp; codeLang) {
-			<span class="hljs-keyword">return</span> {
-				...codeLang,
-				<span class="hljs-attr">literate</span>: <span class="hljs-literal">true</span>
-			};
-		}
-	}
-	<span class="hljs-keyword">return</span> lang;
-};</pre></div>
-
-
-
-        <p>Keep it DRY. Extract the docco <strong>version</strong> from <code>package.json</code></p>
-
-
-          <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> version = <span class="hljs-built_in">JSON</span>.parse(fs.readFileSync(path.join(__dirname, <span class="hljs-string">"package.json"</span>))).version;
-
-<span class="hljs-keyword">const</span> errorCallback = <span class="hljs-function">(<span class="hljs-params">error</span>) =&gt;</span> {
-	<span class="hljs-keyword">if</span> (error) {
-		<span class="hljs-keyword">throw</span> error;
-	}
-};</pre></div>
-
-
-
-        <p>Given a string of source code, <strong>parse</strong> out each block of prose and the code that
-follows it — by detecting which is which, line by line — and then create an
-individual <strong>section</strong> for it. Each section is an object with <code>docsText</code> and
-<code>codeText</code> properties, and eventually <code>docsHtml</code> and <code>codeHtml</code> as well.</p>
-
-
-          <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> parse = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">source, code, config = {}</span>) </span>{
-	<span class="hljs-keyword">const</span> sections = [];
-	<span class="hljs-keyword">const</span> lang = getLanguage(source, config);
-	<span class="hljs-keyword">let</span> codeText, docsText, maybeCode;
-	<span class="hljs-keyword">let</span> hasCode = docsText = codeText = <span class="hljs-string">""</span>;
-	<span class="hljs-keyword">let</span> lines = code.split(<span class="hljs-string">"\n"</span>);
-	<span class="hljs-keyword">let</span> isText = <span class="hljs-literal">false</span>;
-	<span class="hljs-keyword">const</span> save = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
-		sections.push({docsText, codeText});
-		hasCode = docsText = codeText = <span class="hljs-string">""</span>;
-	};</pre></div>
-
-
-
-        <p>Our quick-and-dirty implementation of the literate programming style. Simply
-invert the prose and code relationship on a per-line basis, and then continue as
-normal below.</p>
-
-
-
-
-        <p>sections</p>
-
-
-          <div class='highlight'><pre>	<span class="hljs-keyword">if</span> (lang.literate) {
-		<span class="hljs-keyword">const</span> litRegex = <span class="hljs-regexp">/^([ ]{4}|[ ]{0,3}\t)/</span>;
-		<span class="hljs-keyword">const</span> searchRegex = <span class="hljs-regexp">/^\s*$/</span>;
-		isText = maybeCode = <span class="hljs-literal">true</span>;
-		lines = lines.map(<span class="hljs-function">(<span class="hljs-params">line</span>) =&gt;</span> {
-			<span class="hljs-keyword">const</span> match = litRegex.exec(line);
-			<span class="hljs-keyword">if</span> (maybeCode &amp;&amp; match) {
-				isText = <span class="hljs-literal">false</span>;
-				<span class="hljs-keyword">return</span> line.slice(match[<span class="hljs-number">0</span>].length);
-			} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (maybeCode &amp;&amp; line.search(searchRegex)) {
-				<span class="hljs-keyword">return</span> isText ? lang.symbol : <span class="hljs-string">""</span>;
-			}
-			isText = <span class="hljs-literal">true</span>;
-			<span class="hljs-keyword">return</span> <span class="hljs-string">`<span class="hljs-subst">${lang.symbol }</span> <span class="hljs-subst">${ line}</span>`</span>;
-		});
-	}
-
-	<span class="hljs-keyword">const</span> docsRegex = <span class="hljs-regexp">/^(---+|===+)$/</span>;
-	<span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> line <span class="hljs-keyword">of</span> lines) {
-		<span class="hljs-keyword">if</span> (line.match(lang.commentMatcher) &amp;&amp; !line.match(lang.commentFilter)) {
-			<span class="hljs-keyword">if</span> (hasCode) {
-				save();
-			}
-			docsText += <span class="hljs-string">`<span class="hljs-subst">${line.replace(lang.commentMatcher, <span class="hljs-string">""</span>)}</span>\n`</span>;
-			<span class="hljs-keyword">if</span> (docsRegex.test(line)) {
-				save();
-			}
-		} <span class="hljs-keyword">else</span> {
-			hasCode = <span class="hljs-literal">true</span>;
-			codeText += <span class="hljs-string">`<span class="hljs-subst">${line }</span>\n`</span>;
-		}
-	}
-	save();
-	<span class="hljs-keyword">return</span> sections;
-};</pre></div>
-
-
-
-        <p>To <strong>format</strong> and highlight the now-parsed sections of code, we use <strong>Highlight.js</strong>
-over stdio, and run the text of their corresponding comments through
-<strong>Markdown</strong>, using <a href="https://github.com/chjj/marked">Marked</a>.</p>
-
-
-          <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> format = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">source, sections, config = {}</span>) </span>{
-	<span class="hljs-keyword">const</span> language = getLanguage(source, config);</pre></div>
-
-
-
-        <p>Pass any user defined options to Marked if specified via command line option</p>
-
-
-          <div class='highlight'><pre>	<span class="hljs-keyword">const</span> markedOptions = config.marked || {
-		<span class="hljs-attr">smartypants</span>: <span class="hljs-literal">true</span>
-	};
-	marked.setOptions(markedOptions);</pre></div>
-
-
-
-        <p>Tell Marked how to highlight code blocks within comments, treating that code
-as either the language specified in the code block or the language of the file
-if not specified.</p>
-
-
-          <div class='highlight'><pre>	marked.setOptions({
-		highlight(code, lang = language.name) {
-			<span class="hljs-keyword">if</span> (highlightjs.getLanguage(lang)) {
-				<span class="hljs-keyword">return</span> highlightjs.highlight(lang, code).value;
-			}
-			global.console.warn(<span class="hljs-string">`docco: couldn't highlight code block with unknown language '<span class="hljs-subst">${lang}</span>' in <span class="hljs-subst">${source}</span>`</span>);
-			<span class="hljs-keyword">return</span> code;
-		}
-	});
-
-	<span class="hljs-keyword">return</span> sections.map(<span class="hljs-function">(<span class="hljs-params">section</span>) =&gt;</span> {
-		<span class="hljs-keyword">let</span> code = highlightjs.highlight(language.name, section.codeText).value;
-		code = code.replace(<span class="hljs-regexp">/\s+$/</span>, <span class="hljs-string">""</span>);
-		section.codeHtml = <span class="hljs-string">`&lt;div class='highlight'&gt;&lt;pre&gt;<span class="hljs-subst">${code}</span>&lt;/pre&gt;&lt;/div&gt;`</span>;
-		section.docsHtml = marked(section.docsText);
-		<span class="hljs-keyword">return</span> section.docsHtml;
-	});
-};</pre></div>
-
-
-
-        <p>Once all of the code has finished highlighting, we can <strong>write</strong> the resulting
-documentation file by passing the completed HTML sections into the template,
-and rendering it to the specified output path.</p>
-
-
-          <div class='highlight'><pre><span class="hljs-keyword">const</span> write = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">source, sections, config</span>) </span>{
-	<span class="hljs-keyword">var</span> css, destination, first, firstSection, hasTitle, html, relative, title;
-	destination = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">file</span>) </span>{
-		<span class="hljs-keyword">return</span> path.join(config.output, path.dirname(file), <span class="hljs-string">`<span class="hljs-subst">${path.basename(file, path.extname(file)) }</span>.html`</span>);
-	};
-	relative = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">file</span>) </span>{
-		<span class="hljs-keyword">var</span> <span class="hljs-keyword">from</span>, to;
-		to = path.dirname(path.resolve(file));
-		<span class="hljs-keyword">from</span> = path.dirname(path.resolve(destination(source)));
-		<span class="hljs-keyword">return</span> path.join(path.relative(<span class="hljs-keyword">from</span>, to), path.basename(file));
-	};</pre></div>
-
-
-
-        <p>The <strong>title</strong> of the file is either the first heading in the prose, or the
-name of the source file.</p>
-
-
-          <div class='highlight'><pre>	firstSection = underscore.find(sections, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">section</span>) </span>{
-		<span class="hljs-keyword">return</span> section.docsText.length &gt; <span class="hljs-number">0</span>;
-	});
-	<span class="hljs-keyword">if</span> (firstSection) {
-		first = marked.lexer(firstSection.docsText)[<span class="hljs-number">0</span>];
-	}
-	hasTitle = first &amp;&amp; first.type === <span class="hljs-string">"heading"</span> &amp;&amp; first.depth === <span class="hljs-number">1</span>;
-	title = hasTitle ? first.text : path.basename(source);
-	css = relative(path.join(config.output, path.basename(config.css)));
-	html = config.template({
-		<span class="hljs-attr">sources</span>: config.sources,
-		css,
-		title,
-		hasTitle,
-		sections,
-		path,
-		destination,
-		relative
-	});
-	global.console.log(<span class="hljs-string">`docco: <span class="hljs-subst">${source}</span> -&gt; <span class="hljs-subst">${destination(source)}</span>`</span>);
-	<span class="hljs-keyword">return</span> fs.outputFileSync(destination(source), html);
-};</pre></div>
-
-
-
-        <h2 id="configuration">Configuration</h2>
-
-
-
-
-        <p>Default configuration <strong>options</strong>. All of these may be extended by
-user-specified options.</p>
-
-
-          <div class='highlight'><pre><span class="hljs-keyword">const</span> defaults = {
-	<span class="hljs-attr">layout</span>: <span class="hljs-string">"parallel"</span>,
-	<span class="hljs-attr">output</span>: <span class="hljs-string">"docs"</span>,
-	<span class="hljs-attr">template</span>: <span class="hljs-literal">null</span>,
-	<span class="hljs-attr">css</span>: <span class="hljs-literal">null</span>,
-	<span class="hljs-attr">extension</span>: <span class="hljs-literal">null</span>,
-	<span class="hljs-attr">languages</span>: {},
-	<span class="hljs-attr">marked</span>: <span class="hljs-literal">null</span>
-};</pre></div>
-
-
-
-        <p><strong>Configure</strong> this particular run of Docco. We might use a passed-in external
-template, or one of the built-in <strong>layouts</strong>. We only attempt to process
-source files for languages for which we have definitions.</p>
-
-
-          <div class='highlight'><pre><span class="hljs-keyword">const</span> configure = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">options</span>) </span>{
-	<span class="hljs-keyword">var</span> config, dir;
-	config = underscore.extend({}, defaults, underscore.pick(options, ...underscore.keys(defaults)));
-	config.languages = buildMatchers(config.languages);</pre></div>
-
-
-
-        <p>The user is able to override the layout file used with the <code>--template</code> parameter.
-In this case, it is also neccessary to explicitly specify a stylesheet file.
-These custom templates are compiled exactly like the predefined ones, but the <code>public</code> folder
-is only copied for the latter.</p>
-
-
-          <div class='highlight'><pre>	<span class="hljs-keyword">if</span> (options.template) {
-		<span class="hljs-keyword">if</span> (!options.css) {
-			global.console.warn(<span class="hljs-string">"docco: no stylesheet file specified"</span>);
-		}
-		config.layout = <span class="hljs-literal">null</span>;
-	} <span class="hljs-keyword">else</span> {
-		dir = config.layout = path.join(__dirname, <span class="hljs-string">"resources"</span>, config.layout);
-		<span class="hljs-keyword">if</span> (fs.existsSync(path.join(dir, <span class="hljs-string">"public"</span>))) {
-			config.public = path.join(dir, <span class="hljs-string">"public"</span>);
-		}
-		config.template = path.join(dir, <span class="hljs-string">"docco.jst"</span>);
-		config.css = options.css || path.join(dir, <span class="hljs-string">"docco.css"</span>);
-	}
-	config.template = underscore.template(fs.readFileSync(config.template).toString());
-	<span class="hljs-keyword">if</span> (options.marked) {
-		config.marked = <span class="hljs-built_in">JSON</span>.parse(fs.readFileSync(options.marked));
-	}
-	config.sources = options.args.filter(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">source</span>) </span>{
-		<span class="hljs-keyword">var</span> lang;
-		lang = getLanguage(source, config);
-		<span class="hljs-keyword">if</span> (!lang) {
-			global.console.warn(<span class="hljs-string">`docco: skipped unknown type (<span class="hljs-subst">${path.basename(source)}</span>)`</span>);
-		}
-		<span class="hljs-keyword">return</span> lang;
-	}).sort();
-	<span class="hljs-keyword">return</span> config;
-};
-
-
-<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-built_in">document</span> = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">options = {}, callback = errorCallback</span>) </span>{
-	<span class="hljs-keyword">var</span> config;
-	config = configure(options);
-	<span class="hljs-keyword">return</span> fs.mkdirs(config.output, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
-		<span class="hljs-keyword">var</span> complete, copyAsset, files, nextFile;
-		copyAsset = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">file, callback</span>) </span>{
-			<span class="hljs-keyword">if</span> (!fs.existsSync(file)) {
-				<span class="hljs-keyword">return</span> callback();
-			}
-			<span class="hljs-keyword">return</span> fs.copy(file, path.join(config.output, path.basename(file)), callback);
-		};
-		complete = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
-			<span class="hljs-keyword">return</span> copyAsset(config.css, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">error</span>) </span>{
-				<span class="hljs-keyword">if</span> (error) {
-					<span class="hljs-keyword">return</span> callback(error);
-				}
-				<span class="hljs-keyword">if</span> (fs.existsSync(config.public)) {
-					<span class="hljs-keyword">return</span> copyAsset(config.public, callback);
-				}
-				<span class="hljs-keyword">return</span> callback();
-			});
-		};
-		files = config.sources.slice();
-		nextFile = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
-			<span class="hljs-keyword">var</span> source;
-			source = files.shift();
-			<span class="hljs-keyword">return</span> fs.readFile(source, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">error, buffer</span>) </span>{
-				<span class="hljs-keyword">var</span> code, sections;
-				<span class="hljs-keyword">if</span> (error) {
-					<span class="hljs-keyword">return</span> callback(error);
-				}
-				code = buffer.toString();
-				sections = parse(source, code, config);
-				format(source, sections, config);
-				write(source, sections, config);
-				<span class="hljs-keyword">if</span> (files.length) {
-					<span class="hljs-keyword">return</span> nextFile();
-				}
-				<span class="hljs-keyword">return</span> complete();
-			});
-		};
-		<span class="hljs-keyword">return</span> nextFile();
-	});
-};</pre></div>
-
-
-
-        <h2 id="command-line-interface">Command Line Interface</h2>
-
-
-
-
-        <p>Finally, let’s define the interface to run Docco from the command line.
-Parse options using <a href="https://github.com/visionmedia/commander.js">Commander</a>.</p>
-
-
-          <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> run = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">args = process.argv</span>) </span>{
-	commander.version(version)
-		.usage(<span class="hljs-string">"[options] files"</span>)
-		.option(<span class="hljs-string">"-L, --languages [file]"</span>, <span class="hljs-string">"use a custom languages.json"</span>, underscore.compose(<span class="hljs-built_in">JSON</span>.parse, fs.readFileSync))
-		.option(<span class="hljs-string">"-l, --layout [name]"</span>, <span class="hljs-string">"choose a layout (parallel, linear or classic)"</span>, defaults.layout)
-		.option(<span class="hljs-string">"-o, --output [path]"</span>, <span class="hljs-string">"output to a given folder"</span>, defaults.output)
-		.option(<span class="hljs-string">"-c, --css [file]"</span>, <span class="hljs-string">"use a custom css file"</span>, defaults.css)
-		.option(<span class="hljs-string">"-t, --template [file]"</span>, <span class="hljs-string">"use a custom .jst template"</span>, defaults.template)
-		.option(<span class="hljs-string">"-e, --extension [ext]"</span>, <span class="hljs-string">"assume a file extension for all inputs"</span>, defaults.extension)
-		.option(<span class="hljs-string">"-m, --marked [file]"</span>, <span class="hljs-string">"use custom marked options"</span>, defaults.marked)
-		.parse(args).name = <span class="hljs-string">"docco"</span>;
-	<span class="hljs-keyword">if</span> (commander.args.length) {
-		<span class="hljs-keyword">return</span> <span class="hljs-built_in">document</span>(commander);
-	}
-	<span class="hljs-keyword">return</span> global.console.log(commander.helpInformation());
-};
-
-<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+          <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
 	<span class="hljs-built_in">document</span>,
 	format,
 	parse,
-	run,
+	cli,
 	version
 };</pre></div>
+
+
+
+        <p>The core function called by the CLI is, unsurprisingly, called <code>cli</code>.
+However with the other functions you can programatically use docco.</p>
+
 
 
       <div class="fleur">h</div>
