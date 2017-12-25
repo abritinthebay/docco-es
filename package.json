@@ -34,6 +34,9 @@
   "bin": {
     "docco": "./bin/docco"
   },
+  "scripts": {
+    "docs" : "docco lib/*.js -l linear && cp ./docs/lib/docco.html ./index.html"
+  },
   "@std/esm": {
     "esm": "js",
     "cjs": true
