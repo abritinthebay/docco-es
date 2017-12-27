@@ -23,7 +23,7 @@ For more information, see:
 
 	docco [options] FILES
 
-### Options:
+### Options
 
 * `-h, --help` Output usage information
 * `-V, --version` Output the version number
@@ -37,7 +37,7 @@ For more information, see:
 * `-T, --throw` Throw errors if code syntax highlighting fails
 * `-v, --verbose` Shows all files as they are proccessed rather than a summary
 
-#Layouts
+## Layouts
 
 A layout is composed of a CSS file and a JST file. You can provide both of these to Docco to create your own layouts but Docco-ES ships with three layouts built-in.
 
