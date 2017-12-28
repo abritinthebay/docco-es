@@ -1,10 +1,12 @@
+# Docco-ES
+
 	       __
 	  ____/ /___  ______________        ___  _____
 	 / __  / __ \/ ___/ ___/ __ \______/ _ \/ ___/
 	/ /_/ / /_/ / /__/ /__/ /_/ /_____/  __(__  )
 	\__,_/\____/\___/\___/\____/      \___/____/
 
-# About Docco-ES
+## About
 
 Docco-ES is a quick-and-simple documentation generator. Inspired by the concepts of [Literate Programming](https://en.wikipedia.org/wiki/Literate_programming) it allows you to see your code's comments
 along side the code as documentation.
