@@ -35,7 +35,7 @@
     "docco": "./bin/docco"
   },
   "scripts": {
-    "docs" : "docco lib/*.js -l linear && cp ./docs/lib/docco.html ./index.html"
+    "docs": "docco lib/*.js -l linear && cp ./docs/lib/docco.html ./index.html"
   },
   "@std/esm": {
     "esm": "js",
@@ -43,7 +43,9 @@
   },
   "devDependencies": {
     "babel-eslint": "8.1.0",
+    "coveralls": "^3.0.0",
     "eslint": "4.14.0",
-    "eslint-plugin-babel": "4.1.2"
+    "eslint-plugin-babel": "4.1.2",
+    "jest": "^22.0.4"
   }
 }
