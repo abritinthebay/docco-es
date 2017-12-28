@@ -30,7 +30,7 @@
     "lodash.template": "4.4.0",
     "marked": "0.3.9"
   },
-  "main": "./index.js",
+  "main": "./lib/index.js",
   "bin": {
     "docco": "./bin/docco"
   },
