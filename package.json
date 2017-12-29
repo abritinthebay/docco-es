@@ -1,51 +1,62 @@
 {
-  "name": "docco-es",
-  "description": "A Modern Literate Programming Documentation Generator",
-  "keywords": [
-    "documentation",
-    "docs",
-    "generate",
-    "generator",
-    "literate",
-    "javascript",
-    "es6",
-    "es2015",
-    "ecmascript"
-  ],
-  "author": "Gregory Wild-Smith",
-  "version": "1.1.1",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/abritinthebay/docco-es.git"
-  },
-  "engines": {
-    "node": ">=8.6.0"
-  },
-  "dependencies": {
-    "@std/esm": "0.18.0",
-    "commander": "2.12.2",
-    "fs-extra": "5.0.0",
-    "highlight.js": "9.12.0",
-    "lodash.template": "4.4.0",
-    "marked": "0.3.9"
-  },
-  "main": "./lib/index.js",
-  "bin": {
-    "docco": "./bin/docco"
-  },
-  "scripts": {
-    "docs": "docco lib/*.js -l linear && cp ./docs/lib/docco.html ./index.html"
-  },
-  "@std/esm": {
-    "esm": "js",
-    "cjs": true
-  },
-  "devDependencies": {
-    "babel-eslint": "8.1.0",
-    "coveralls": "^3.0.0",
-    "eslint": "4.14.0",
-    "eslint-plugin-babel": "4.1.2",
-    "jest": "^22.0.4"
-  }
+	"name": "docco-es",
+	"description": "A Modern Literate Programming Documentation Generator",
+	"keywords": [
+		"documentation",
+		"docs",
+		"generate",
+		"generator",
+		"literate",
+		"javascript",
+		"es6",
+		"es2015",
+		"ecmascript"
+	],
+	"author": "Gregory Wild-Smith",
+	"version": "1.1.1",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/abritinthebay/docco-es.git"
+	},
+	"engines": {
+		"node": ">=8.6.0"
+	},
+	"dependencies": {
+		"@std/esm": "0.18.0",
+		"commander": "2.12.2",
+		"fs-extra": "5.0.0",
+		"highlight.js": "9.12.0",
+		"lodash.template": "4.4.0",
+		"marked": "0.3.9"
+	},
+	"main": "./lib/index.js",
+	"bin": {
+		"docco": "./bin/docco"
+	},
+	"scripts": {
+		"test": "jest --coverage --forceExit",
+		"docs": "docco lib/*.js -l linear && cp ./docs/lib/docco.html ./index.html"
+	},
+	"@std/esm": {
+		"esm": "js",
+		"cjs": true
+	},
+	"devDependencies": {
+		"babel-core": "^6.26.0",
+		"babel-eslint": "8.1.0",
+		"babel-jest": "^22.0.4",
+		"babel-preset-env": "^1.6.1",
+		"coveralls": "^3.0.0",
+		"eslint": "4.14.0",
+		"eslint-plugin-babel": "4.1.2",
+		"jest": "^22.0.4"
+	},
+	"jest": {
+		"coverageReporters": [
+			"json",
+			"lcov",
+			"text"
+		]
+	}
 }
