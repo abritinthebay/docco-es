@@ -6,7 +6,7 @@
 	/ /_/ / /_/ / /__/ /__/ /_/ /_____/  __(__  )
 	\__,_/\____/\___/\___/\____/      \___/____/
 [![npm](https://img.shields.io/npm/v/docco-es.svg?style=for-the-badge)](https://www.npmjs.com/package/docco-es)
-[![Coverage Status](https://coveralls.io/repos/github/abritinthebay/docco-es/badge.svg?branch=master)](https://coveralls.io/github/abritinthebay/docco-es?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/abritinthebay/docco-es/badge.svg?branch=master)https://img.shields.io/coveralls/github/abritinthebay/docco-es.svg
 
 ## About
 
