@@ -35,7 +35,7 @@
 		"docco": "./bin/docco"
 	},
 	"scripts": {
-		"test": "jest --coverage --forceExit --maxWorkers=4",
+		"test": "jest --coverage --forceExit --runInBand",
 		"posttest": "coveralls ./coverage/lcov.info",
 		"docs": "docco lib/*.js -l linear && cp ./docs/lib/docco.html ./index.html"
 	},
