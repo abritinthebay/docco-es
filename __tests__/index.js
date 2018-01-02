@@ -1,11 +1,11 @@
 /* global it, describe expect */
-const docco = require("../lib/index");
+const docco = require("../lib/docco");
 const configure = require("../lib/configure");
 const format = require("../lib/format");
 
 describe("Public API", () => {
 	it("is defined correctly", () => {
-		expect(Object.keys(docco)).toEqual(expect.arrayContaining([
+		expect(Object.keys(docco.default)).toEqual(expect.arrayContaining([
 			"document",
 			"format",
 			"parse",
@@ -17,6 +17,11 @@ describe("Public API", () => {
 		expect(typeof docco.parse).toBe("function");
 		expect(typeof docco.cli).toBe("function");
 		expect(typeof docco.version).toBe("string");
+		expect(docco.document).toEqual(docco.default.document);
+		expect(docco.format).toEqual(docco.default.format);
+		expect(docco.parse).toEqual(docco.default.parse);
+		expect(docco.cli).toEqual(docco.default.cli);
+		expect(docco.version).toEqual(docco.default.version);
 	});
 });
 
