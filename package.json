@@ -36,7 +36,6 @@
 	},
 	"scripts": {
 		"test": "jest --coverage --forceExit",
-		"posttest": "coveralls ./coverage/lcov.info",
 		"docs": "docco lib/*.js -l linear && cp ./docs/lib/docco.html ./index.html"
 	},
 	"@std/esm": {

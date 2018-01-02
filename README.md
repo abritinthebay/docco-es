@@ -7,7 +7,7 @@
 	\__,_/\____/\___/\___/\____/      \___/____/
 [![npm](https://img.shields.io/npm/v/docco-es.svg?style=for-the-badge)](https://www.npmjs.com/package/docco-es)
 [![Coverage Status](https://img.shields.io/coveralls/github/abritinthebay/docco-es.svg?style=for-the-badge)](https://coveralls.io/repos/github/abritinthebay/docco-es)
-[![Travis](https://img.shields.io/travis/abritinthebay/docco-es.svg?style=for-the-badge)](https://travis-ci.org/abritinthebay/docco-es/builds)
+[![CircleCI](https://img.shields.io/circleci/project/github/abritinthebay/docco-es.svg?style=for-the-badge)]()
 
 ## About
 
