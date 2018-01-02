@@ -36,7 +36,8 @@
 	},
 	"scripts": {
 		"test": "jest --coverage --forceExit",
-		"docs": "docco lib/*.js -l linear && cp ./docs/lib/docco.html ./index.html"
+		"docs": "docco lib/*.js -l linear && cp ./docs/lib/docco.html ./index.html",
+		"posttest": "coveralls < coverage/lcov.info"
 	},
 	"@std/esm": {
 		"esm": "js",
@@ -47,6 +48,7 @@
 		"babel-eslint": "8.1.0",
 		"babel-jest": "^22.0.4",
 		"babel-preset-env": "^1.6.1",
+		"coveralls": "^3.0.0",
 		"eslint": "4.14.0",
 		"eslint-plugin-babel": "4.1.2",
 		"jest": "^22.0.4"
