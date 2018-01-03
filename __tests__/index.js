@@ -59,6 +59,12 @@ describe("Configure", () => {
 			sources: expect.any(Array)
 		}));
 	});
+	it("correctly sets layout when provided a template", () => {
+		global.console.warn = jest.fn();
+		const config = configure.configure({template: "foo.jst"});
+		console.log(global.console.warn.mock);
+		expect(config.layout).toBe(null);
+	});
 });
 
 describe("Format", () => {
