@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>parse.js</title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
+  <link rel="stylesheet" media="all" href="../docco.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="page">
+
+      <div class="header">
+        
+          <h1>parse.js</h1>
+        
+
+        
+          <div class="toc">
+            <h3>Table of Contents</h3>
+            <ol>
+              
+                
+                <li>
+                  <a class="source" href="cli.html">
+                    lib/cli.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="configure.html">
+                    lib/configure.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="defaults.html">
+                    lib/defaults.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="docco.html">
+                    lib/docco.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="document.html">
+                    lib/document.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="format.html">
+                    lib/format.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="index.html">
+                    lib/index.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="languages.html">
+                    lib/languages.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="parse.html">
+                    lib/parse.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="write.html">
+                    lib/write.js
+                  </a>
+                </li>
+              
+            </ol>
+          </div>
+        
+      </div>
+
+      
+        
+        
+        
+          <div class='highlight'><pre><span class="hljs-keyword">import</span> {getLanguage} <span class="hljs-keyword">from</span> <span class="hljs-string">"./languages"</span>;</pre></div>
+        
+      
+        
+        <p>Given a string of source code, <strong>parse</strong> out each block of prose and the code that
+follows it — by detecting which is which, line by line — and then create an
+individual <strong>section</strong> for it. Each section is an object with <code>docsText</code> and
+<code>codeText</code> properties, and eventually <code>docsHtml</code> and <code>codeHtml</code> as well.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> parse = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">source, code, config = {}</span>) </span>{
+	<span class="hljs-keyword">const</span> sections = [];
+	<span class="hljs-keyword">const</span> lang = getLanguage(source, config);
+	<span class="hljs-keyword">let</span> codeText, docsText;
+	<span class="hljs-keyword">let</span> hasCode = docsText = codeText = <span class="hljs-string">""</span>;
+	<span class="hljs-keyword">let</span> lines = code.split(<span class="hljs-string">"\n"</span>);
+	<span class="hljs-keyword">const</span> save = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+		sections.push({docsText, codeText});
+		hasCode = docsText = codeText = <span class="hljs-string">""</span>;
+	};</pre></div>
+        
+      
+        
+        <p>Our quick-and-dirty implementation of the literate programming style. Simply
+invert the prose and code relationship on a per-line basis, and then continue as
+normal below.</p>
+
+        
+      
+        
+        <p>sections</p>
+
+        
+          <div class='highlight'><pre>	<span class="hljs-keyword">if</span> (lang.literate) {
+		<span class="hljs-keyword">const</span> litRegex = <span class="hljs-regexp">/^([ ]{4}|[ ]{0,3}\t)/</span>;
+		<span class="hljs-keyword">const</span> searchRegex = <span class="hljs-regexp">/^\s*$/</span>;
+		<span class="hljs-keyword">let</span> isText = <span class="hljs-literal">true</span>;
+		lines = lines.map(<span class="hljs-function">(<span class="hljs-params">line</span>) =&gt;</span> {
+			<span class="hljs-keyword">const</span> match = litRegex.exec(line);
+			<span class="hljs-keyword">if</span> (match) {
+				isText = <span class="hljs-literal">false</span>;
+				<span class="hljs-keyword">return</span> line.slice(match[<span class="hljs-number">0</span>].length);
+			} <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (line.search(searchRegex)) {
+				<span class="hljs-keyword">return</span> isText ? lang.symbol : <span class="hljs-string">""</span>;
+			}
+			isText = <span class="hljs-literal">true</span>;
+			<span class="hljs-keyword">return</span> <span class="hljs-string">`<span class="hljs-subst">${lang.symbol }</span> <span class="hljs-subst">${ line}</span>`</span>;
+		});
+	}
+
+	<span class="hljs-keyword">const</span> docsRegex = <span class="hljs-regexp">/^(---+|===+)$/</span>;
+	<span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> line <span class="hljs-keyword">of</span> lines) {
+		<span class="hljs-keyword">if</span> (line &amp;&amp; line.match(lang.commentMatcher) &amp;&amp; !line.match(lang.commentFilter)) {
+			<span class="hljs-keyword">if</span> (hasCode) {
+				save();
+			}
+			docsText += <span class="hljs-string">`<span class="hljs-subst">${line.replace(lang.commentMatcher, <span class="hljs-string">""</span>)}</span>\n`</span>;
+			<span class="hljs-keyword">if</span> (docsRegex.test(line)) {
+				save();
+			}
+		} <span class="hljs-keyword">else</span> {
+			hasCode = <span class="hljs-literal">true</span>;
+			codeText += <span class="hljs-string">`<span class="hljs-subst">${line }</span>\n`</span>;
+		}
+	}
+	save();
+	<span class="hljs-keyword">return</span> sections;
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> parse;</pre></div>
+        
+      
+      <div class="fleur">h</div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>Documentation Creator</title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
+  <link rel="stylesheet" media="all" href="../docco.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="page">
+
+      <div class="header">
+        
+          
+          <h1 id="documentation-creator">Documentation Creator</h1>
+<p>This code is what actually <em>creates</em> the documentation by running the
+parser/formatter against the source files and writing their output to files.</p>
+
+          
+            <div class='highlight'><pre>
+<span class="hljs-keyword">import</span> fs <span class="hljs-keyword">from</span> <span class="hljs-string">"fs-extra"</span>;
+<span class="hljs-keyword">import</span> path <span class="hljs-keyword">from</span> <span class="hljs-string">"path"</span>;
+<span class="hljs-keyword">import</span> {promisify} <span class="hljs-keyword">from</span> <span class="hljs-string">"util"</span>;
+
+<span class="hljs-keyword">import</span> configure <span class="hljs-keyword">from</span> <span class="hljs-string">"./configure"</span>;
+<span class="hljs-keyword">import</span> parse <span class="hljs-keyword">from</span> <span class="hljs-string">"./parse"</span>;
+<span class="hljs-keyword">import</span> format <span class="hljs-keyword">from</span> <span class="hljs-string">"./format"</span>;
+<span class="hljs-keyword">import</span> write <span class="hljs-keyword">from</span> <span class="hljs-string">"./write"</span>;</pre></div>
+          
+        
+
+        
+          <div class="toc">
+            <h3>Table of Contents</h3>
+            <ol>
+              
+                
+                <li>
+                  <a class="source" href="cli.html">
+                    lib/cli.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="configure.html">
+                    lib/configure.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="defaults.html">
+                    lib/defaults.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="docco.html">
+                    lib/docco.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="document.html">
+                    lib/document.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="format.html">
+                    lib/format.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="index.html">
+                    lib/index.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="languages.html">
+                    lib/languages.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="parse.html">
+                    lib/parse.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="write.html">
+                    lib/write.js
+                  </a>
+                </li>
+              
+            </ol>
+          </div>
+        
+      </div>
+
+      
+        
+        <p>Simple Promisified version of the Node fs.readFile. Useful for async batching.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">const</span> readFileAsync = promisify(fs.readFile);
+
+<span class="hljs-keyword">const</span> errorCallback = <span class="hljs-function">(<span class="hljs-params">error</span>) =&gt;</span> {
+	<span class="hljs-keyword">if</span> (error) {
+		<span class="hljs-keyword">throw</span> error;
+	}
+};
+
+<span class="hljs-keyword">const</span> copyAsset = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">file, output, callback</span>) </span>{
+	<span class="hljs-keyword">if</span> (!fs.existsSync(file)) {
+		<span class="hljs-keyword">return</span> callback();
+	}
+	<span class="hljs-keyword">return</span> fs.copy(file, path.join(output, path.basename(file)), callback);
+};</pre></div>
+        
+      
+        
+        <p>Factory that returns a function that processes a source file.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">const</span> processSourcesFactory = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">config, callback</span>) </span>{
+	<span class="hljs-keyword">return</span> <span class="hljs-function">(<span class="hljs-params">source</span>) =&gt;</span> {</pre></div>
+        
+      
+        
+        <p>We first read the file</p>
+
+        
+          <div class='highlight'><pre>		<span class="hljs-keyword">return</span> readFileAsync(source)
+			.then(<span class="hljs-function">(<span class="hljs-params">buffer</span>) =&gt;</span> {</pre></div>
+        
+      
+        
+        <p>then we parse the code, format it into sections, and finally write it to a file.</p>
+
+        
+          <div class='highlight'><pre>				<span class="hljs-keyword">const</span> code = buffer.toString();
+				<span class="hljs-keyword">const</span> sections = format(source, parse(source, code, config), config);
+				write(source, sections, config);
+				config.writtenSources = (config.writtenSources || <span class="hljs-number">0</span>) + <span class="hljs-number">1</span>;
+			})
+			.catch(callback);
+	};
+};</pre></div>
+        
+      
+        
+        <p>Simply Factory method that builds a function which, as long as there is no error,
+will copy the layout’s files (if any) from its public folder to the output folder.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">const</span> copyLayoutFactory = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">config, callback</span>) </span>{
+	<span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">error</span>) </span>{
+		<span class="hljs-keyword">if</span> (error) {
+			<span class="hljs-keyword">return</span> callback(error);
+		}
+		<span class="hljs-keyword">if</span> (fs.existsSync(config.public)) {
+			<span class="hljs-keyword">return</span> copyAsset(config.public, config.output, callback);
+		}
+		<span class="hljs-keyword">return</span> callback();
+	};
+};</pre></div>
+        
+      
+        
+        <p>Document is the function that actaully creates the documentation.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-built_in">document</span> = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">options = {}, callback = errorCallback</span>) </span>{</pre></div>
+        
+      
+        
+        <p>First we get a config object from the passed options.</p>
+
+        
+          <div class='highlight'><pre>	<span class="hljs-keyword">const</span> config = configure(options);</pre></div>
+        
+      
+        
+        <p>Then we make the output directory (if we need to)</p>
+
+        
+          <div class='highlight'><pre>	global.console.log(<span class="hljs-string">"docco: creating output directory (if required)"</span>);
+	<span class="hljs-keyword">return</span> fs.mkdirs(config.output, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+		global.console.log(<span class="hljs-string">"docco: processing sources"</span>);</pre></div>
+        
+      
+        
+        <p>Once the output directory exists we can process the source files.</p>
+
+        
+          <div class='highlight'><pre>		<span class="hljs-keyword">const</span> operations = config.sources.map(processSourcesFactory(config, callback));</pre></div>
+        
+      
+        
+        <p>We batch the Promises that are now in the operations constant
+so we can trigger an event when they all are done (or fast-fail).</p>
+
+        
+          <div class='highlight'><pre>		<span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.all(operations)
+			.then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {</pre></div>
+        
+      
+        
+        <p>Once we’re all done - copy the layouts css and other assets if required.</p>
+
+        
+          <div class='highlight'><pre>				global.console.log(<span class="hljs-string">`docco: processed and wrote <span class="hljs-subst">${config.writtenSources}</span> files to directory: <span class="hljs-subst">${config.output}</span>`</span>);
+				<span class="hljs-keyword">return</span> copyAsset(config.css, config.output, copyLayoutFactory(config, callback));
+			})
+			.catch(callback);
+	});
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-built_in">document</span>;</pre></div>
+        
+      
+      <div class="fleur">h</div>
+    </div>
+  </div>
+</body>
+</html>
