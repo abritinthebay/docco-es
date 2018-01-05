@@ -1,7 +1,8 @@
-/* global it, describe expect */
+/* global jest, it, describe, expect */
 const docco = require("../lib/docco");
 const configure = require("../lib/configure");
 const format = require("../lib/format");
+const parse = require("../lib/parse");
 
 describe("Public API", () => {
 	it("is defined correctly", () => {
@@ -60,10 +61,14 @@ describe("Configure", () => {
 		}));
 	});
 	it("correctly sets layout when provided a template", () => {
+		const warn = global.console.warn;
 		global.console.warn = jest.fn();
 		const config = configure.configure({template: "foo.jst"});
-		console.log(global.console.warn.mock);
 		expect(config.layout).toBe(null);
+		expect(global.console.warn).toHaveBeenCalledTimes(2);
+		expect(global.console.warn).toHaveBeenCalledWith("docco: have a template but no stylesheet file specified.");
+		expect(global.console.warn).toHaveBeenCalledWith("docco: could not load layout template \"foo.jst\"");
+		global.console.warn = warn;
 	});
 });
 
@@ -73,5 +78,11 @@ describe("Format", () => {
 	});
 	it("runs without erroring", () => {
 		expect(format.format).not.toThrow();
+	});
+});
+
+describe("Parse", () => {
+	it("has the correct default export", () => {
+		expect(parse.parse).toEqual(parse.default);
 	});
 });
