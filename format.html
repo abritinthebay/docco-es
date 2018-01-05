@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>Formatter</title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="page">
+
+      <div class="header">
+        
+          
+          <h1 id="formatter">Formatter</h1>
+<p>For each section of code or documentation we want to format it.
+Markdown is processed by Marked and code is (if possible) processed
+by Highlight.JS</p>
+<p>First the external dependancies…</p>
+
+          
+            <div class='highlight'><pre><span class="hljs-keyword">import</span> highlightjs <span class="hljs-keyword">from</span> <span class="hljs-string">"highlight.js"</span>;
+<span class="hljs-keyword">import</span> marked <span class="hljs-keyword">from</span> <span class="hljs-string">"marked"</span>;</pre></div>
+          
+        
+
+        
+          <div class="toc">
+            <h3>Table of Contents</h3>
+            <ol>
+              
+                
+                <li>
+                  <a class="source" href="cli.html">
+                    lib/cli.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="configure.html">
+                    lib/configure.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="defaults.html">
+                    lib/defaults.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="docco.html">
+                    lib/docco.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="document.html">
+                    lib/document.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="format.html">
+                    lib/format.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="index.html">
+                    lib/index.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="languages.html">
+                    lib/languages.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="parse.html">
+                    lib/parse.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="write.html">
+                    lib/write.js
+                  </a>
+                </li>
+              
+            </ol>
+          </div>
+        
+      </div>
+
+      
+        
+        <p>The one internal dependancy we have is language related.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">import</span> {getLanguage} <span class="hljs-keyword">from</span> <span class="hljs-string">"./languages"</span>;</pre></div>
+        
+      
+        
+        <p>To <strong>format</strong> and highlight the now-parsed sections of code, we use <strong>Highlight.js</strong>
+over stdio, and run the text of their corresponding comments through
+<strong>Markdown</strong>, using <a href="https://github.com/chjj/marked">Marked</a>.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> format = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">source = <span class="hljs-string">""</span>, sections = [], config = {}</span>) </span>{
+	<span class="hljs-keyword">const</span> language = getLanguage(source, config);</pre></div>
+        
+      
+        
+        <p>Pass any user defined options to Marked if specified via command line option</p>
+
+        
+          <div class='highlight'><pre>	<span class="hljs-keyword">const</span> markedOptions = config.marked || {
+		<span class="hljs-attr">smartypants</span>: <span class="hljs-literal">true</span>
+	};
+	marked.setOptions(markedOptions);</pre></div>
+        
+      
+        
+        <p>Tell Marked how to highlight code blocks within comments, treating that code
+as either the language specified in the code block or the language of the file
+if not specified.</p>
+
+        
+          <div class='highlight'><pre>	marked.setOptions({
+		highlight(code, lang = language.name) {
+			<span class="hljs-keyword">if</span> (highlightjs.getLanguage(lang)) {
+				<span class="hljs-keyword">return</span> highlightjs.highlight(lang, code).value;
+			}
+			global.console.warn(<span class="hljs-string">`docco: couldn't highlight code block with unknown language '<span class="hljs-subst">${lang}</span>' in <span class="hljs-subst">${source}</span>`</span>);
+			<span class="hljs-keyword">return</span> code;
+		}
+	});</pre></div>
+        
+      
+        
+        <p>making sure this is an immutable operation by cloning sections.</p>
+
+        
+          <div class='highlight'><pre>	<span class="hljs-keyword">return</span> [...sections].map(<span class="hljs-function">(<span class="hljs-params">section</span>) =&gt;</span> {
+		<span class="hljs-keyword">let</span> code;
+		<span class="hljs-keyword">try</span> {
+			code = highlightjs.highlight(language.name, section.codeText).value;
+		} <span class="hljs-keyword">catch</span> (err) {
+			<span class="hljs-keyword">if</span> (config.throw) {
+				<span class="hljs-keyword">throw</span> err;
+			}
+			code = section.codeText;
+		}
+		code = code.replace(<span class="hljs-regexp">/\s+$/</span>, <span class="hljs-string">""</span>);
+		section.codeHtml = <span class="hljs-string">`&lt;div class='highlight'&gt;&lt;pre&gt;<span class="hljs-subst">${code}</span>&lt;/pre&gt;&lt;/div&gt;`</span>;
+		section.docsHtml = marked(section.docsText);
+		<span class="hljs-keyword">return</span> section;
+	});
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> format;</pre></div>
+        
+      
+      <div class="fleur">h</div>
+    </div>
+  </div>
+</body>
+</html>

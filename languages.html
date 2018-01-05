@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>Languages</title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="page">
+
+      <div class="header">
+        
+          
+          <h1 id="languages">Languages</h1>
+<p>Functions that allow us to match a file extension to a language and it’s related properties.</p>
+
+          
+            <div class='highlight'><pre>
+<span class="hljs-keyword">import</span> path <span class="hljs-keyword">from</span> <span class="hljs-string">"path"</span>;
+<span class="hljs-keyword">import</span> fs <span class="hljs-keyword">from</span> <span class="hljs-string">"fs-extra"</span>;</pre></div>
+          
+        
+
+        
+          <div class="toc">
+            <h3>Table of Contents</h3>
+            <ol>
+              
+                
+                <li>
+                  <a class="source" href="cli.html">
+                    lib/cli.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="configure.html">
+                    lib/configure.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="defaults.html">
+                    lib/defaults.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="docco.html">
+                    lib/docco.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="document.html">
+                    lib/document.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="format.html">
+                    lib/format.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="index.html">
+                    lib/index.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="languages.html">
+                    lib/languages.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="parse.html">
+                    lib/parse.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="write.html">
+                    lib/write.js
+                  </a>
+                </li>
+              
+            </ol>
+          </div>
+        
+      </div>
+
+      
+        
+        <p>Languages are stored in JSON in the file <code>resources/languages.json</code>.
+Each item maps the file extension to the name of the language and the
+<code>symbol</code> that indicates a line comment. To add support for a new programming
+language to Docco, just add it to the file.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">const</span> unparsedLanguages = <span class="hljs-built_in">JSON</span>.parse(fs.readFileSync(path.join(__dirname, <span class="hljs-string">"../resources"</span>, <span class="hljs-string">"languages.json"</span>)));</pre></div>
+        
+      
+        
+        <p>Build out the appropriate matchers and delimiters for each language.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">const</span> buildMatchers = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">languages</span>) </span>{
+	<span class="hljs-keyword">return</span> <span class="hljs-built_in">Object</span>.entries(languages).reduce(<span class="hljs-function">(<span class="hljs-params">acc, [extension, lang]</span>) =&gt;</span> {</pre></div>
+        
+      
+        
+        <p>Does the line begin with a comment?</p>
+
+        
+          <div class='highlight'><pre>		lang.commentMatcher = <span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(<span class="hljs-string">`^\\s*<span class="hljs-subst">${lang.symbol}</span>\\s?`</span>);</pre></div>
+        
+      
+        
+        <p>Ignore Shebangs/Hashbangs and interpolations</p>
+
+        
+          <div class='highlight'><pre>		lang.commentFilter = <span class="hljs-regexp">/(^#![/]|^\s*#\{)/</span>;
+		acc[extension] = lang;
+		<span class="hljs-keyword">return</span> acc;
+	}, {});
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> languages = buildMatchers(unparsedLanguages);</pre></div>
+        
+      
+        
+        <p>A function to get the current language we’re documenting, based on the
+file extension. Detect and tag “literate” <code>.ext.md</code> variants.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> getLanguage = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">source, config = {}</span>) </span>{
+	<span class="hljs-keyword">const</span> ext = config.extension || path.extname(source) || path.basename(source);
+	<span class="hljs-keyword">const</span> langList = config.languages &amp;&amp; <span class="hljs-built_in">Object</span>.keys(config.languages).length ? config.languages : languages;
+	<span class="hljs-keyword">const</span> lang = langList[ext];
+	<span class="hljs-keyword">if</span> (lang &amp;&amp; lang.name === <span class="hljs-string">"markdown"</span>) {
+		<span class="hljs-keyword">const</span> codeExt = path.extname(path.basename(source, ext));
+		<span class="hljs-keyword">const</span> codeLang = langList[codeExt];
+		<span class="hljs-keyword">if</span> (codeExt &amp;&amp; codeLang) {
+			<span class="hljs-keyword">return</span> {
+				...codeLang,
+				<span class="hljs-attr">literate</span>: <span class="hljs-literal">true</span>
+			};
+		}
+	}
+	<span class="hljs-keyword">return</span> lang;
+};</pre></div>
+        
+      
+      <div class="fleur">h</div>
+    </div>
+  </div>
+</body>
+</html>

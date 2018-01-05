@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>cli.js</title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="page">
+
+      <div class="header">
+        
+          <h1>cli.js</h1>
+        
+
+        
+          <div class="toc">
+            <h3>Table of Contents</h3>
+            <ol>
+              
+                
+                <li>
+                  <a class="source" href="cli.html">
+                    lib/cli.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="configure.html">
+                    lib/configure.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="defaults.html">
+                    lib/defaults.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="docco.html">
+                    lib/docco.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="document.html">
+                    lib/document.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="format.html">
+                    lib/format.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="index.html">
+                    lib/index.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="languages.html">
+                    lib/languages.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="parse.html">
+                    lib/parse.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="write.html">
+                    lib/write.js
+                  </a>
+                </li>
+              
+            </ol>
+          </div>
+        
+      </div>
+
+      
+        
+        <h2 id="command-line-interface">Command Line Interface</h2>
+<p>The core part of the CLI is here. Mostly it provides a useful, simplifed
+interface around the component parts. Running it locally is as simple as
+<code>cli(opts)</code>, in fact this is how the binary works internally.</p>
+<p>Import our external dependancies.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">import</span> commander <span class="hljs-keyword">from</span> <span class="hljs-string">"commander"</span>;
+<span class="hljs-keyword">import</span> fs <span class="hljs-keyword">from</span> <span class="hljs-string">"fs-extra"</span>;
+<span class="hljs-keyword">import</span> path <span class="hljs-keyword">from</span> <span class="hljs-string">"path"</span>;</pre></div>
+        
+      
+        
+        <p>Import our internal dependancies</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">import</span> defaults <span class="hljs-keyword">from</span> <span class="hljs-string">"./defaults"</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-built_in">document</span> <span class="hljs-keyword">from</span> <span class="hljs-string">"./document"</span>;</pre></div>
+        
+      
+        
+        <p>Extract the docco version from <code>package.json</code>
+We’re exporting this so it is available elsewhere.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> version = <span class="hljs-built_in">JSON</span>.parse(fs.readFileSync(path.join(__dirname, <span class="hljs-string">"../package.json"</span>))).version;</pre></div>
+        
+      
+        
+        <p>Finally, let’s define the interface to run Docco from the command line.
+Parse options using <a href="https://github.com/visionmedia/commander.js">Commander</a>.
+Programatically using the CLI function is possible by simply importing it and
+then running <code>cli({...yourArguments})</code></p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> cli = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">args = process.argv, generate = document</span>) </span>{</pre></div>
+        
+      
+        
+        <p>First, log the logo/description.</p>
+
+        
+          <div class='highlight'><pre>	global.console.log(<span class="hljs-string">`
+	       __
+	  ____/ /___  ______________        ___  _____
+	 / __  / __ \\/ ___/ ___/ __ \\______/ _ \\/ ___/
+	/ /_/ / /_/ / /__/ /__/ /_/ /_____/  __(__  )
+	\\__,_/\\____/\\___/\\___/\\____/      \\___/____/
+
+   The Quick &amp; Simple Literate Doccumentation Generator
+	`</span>);</pre></div>
+        
+      
+        
+        <p>Now we use Commander to both describe the options and then parse the arguments.</p>
+
+        
+          <div class='highlight'><pre>	commander.version(version)
+		.usage(<span class="hljs-string">"[options] files"</span>)
+		.option(<span class="hljs-string">"-L, --languages [file]"</span>, <span class="hljs-string">"use a custom languages.json"</span>, (...args) =&gt; <span class="hljs-built_in">JSON</span>.parse(fs.readFileSync(...args)))
+		.option(<span class="hljs-string">"-l, --layout [name]"</span>, <span class="hljs-string">"choose a layout (parallel, linear or classic)"</span>, defaults.layout)
+		.option(<span class="hljs-string">"-o, --output [path]"</span>, <span class="hljs-string">"output to a given folder"</span>, defaults.output)
+		.option(<span class="hljs-string">"-c, --css [file]"</span>, <span class="hljs-string">"use a custom css file"</span>, defaults.css)
+		.option(<span class="hljs-string">"-t, --template [file]"</span>, <span class="hljs-string">"use a custom .jst template"</span>, defaults.template)
+		.option(<span class="hljs-string">"-e, --extension [ext]"</span>, <span class="hljs-string">"assume a file extension for all inputs"</span>, defaults.extension)
+		.option(<span class="hljs-string">"-m, --marked [file]"</span>, <span class="hljs-string">"use custom marked options"</span>, defaults.marked)
+		.option(<span class="hljs-string">"-T, --throw"</span>, <span class="hljs-string">"throw errors if code syntax highlighting fails"</span>, defaults.throw)
+		.option(<span class="hljs-string">"-v, --verbose"</span>, <span class="hljs-string">"shows all files as they are proccessed rather than a summary"</span>, defaults.verbose)
+		.parse(args).name = <span class="hljs-string">"docco"</span>;</pre></div>
+        
+      
+        
+        <p>If we have parse arguments then we were called with files.
+Lets try to build the documentation.</p>
+
+        
+          <div class='highlight'><pre>	<span class="hljs-keyword">if</span> (commander.args.length) {
+		<span class="hljs-keyword">return</span> generate(commander);
+	}</pre></div>
+        
+      
+        
+        <p>If we weren’t, then just log the help text (a description of the options above).</p>
+
+        
+          <div class='highlight'><pre>	<span class="hljs-keyword">return</span> global.console.log(commander.helpInformation());
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> cli;</pre></div>
+        
+      
+      <div class="fleur">h</div>
+    </div>
+  </div>
+</body>
+</html>

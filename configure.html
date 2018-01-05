@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>Configuration</title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="page">
+
+      <div class="header">
+        
+          
+          <h1 id="configuration">Configuration</h1>
+<p>For any particular run of Docco we might use a passed-in external template,
+or one of the built-in <strong>layouts</strong>. Plus we have to set up a few internal options.</p>
+
+          
+            <div class='highlight'><pre>
+<span class="hljs-keyword">import</span> template <span class="hljs-keyword">from</span> <span class="hljs-string">"lodash.template"</span>;
+<span class="hljs-keyword">import</span> fs <span class="hljs-keyword">from</span> <span class="hljs-string">"fs-extra"</span>;
+<span class="hljs-keyword">import</span> path <span class="hljs-keyword">from</span> <span class="hljs-string">"path"</span>;
+
+<span class="hljs-keyword">import</span> defaults <span class="hljs-keyword">from</span> <span class="hljs-string">"./defaults"</span>;
+<span class="hljs-keyword">import</span> {getLanguage} <span class="hljs-keyword">from</span> <span class="hljs-string">"./languages"</span>;</pre></div>
+          
+        
+
+        
+          <div class="toc">
+            <h3>Table of Contents</h3>
+            <ol>
+              
+                
+                <li>
+                  <a class="source" href="cli.html">
+                    lib/cli.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="configure.html">
+                    lib/configure.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="defaults.html">
+                    lib/defaults.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="docco.html">
+                    lib/docco.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="document.html">
+                    lib/document.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="format.html">
+                    lib/format.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="index.html">
+                    lib/index.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="languages.html">
+                    lib/languages.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="parse.html">
+                    lib/parse.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="write.html">
+                    lib/write.js
+                  </a>
+                </li>
+              
+            </ol>
+          </div>
+        
+      </div>
+
+      
+        
+        <p>This is a simple way of picking which keys from an object you want returned.
+eg: <code>pick({foo: &quot;bar&quot;, a: &quot;b&quot;, c: &quot;d&quot;}, &quot;foo&quot;, &quot;c&quot;) === {foo: &quot;bar&quot;, c: &quot;d&quot;}</code></p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> pick = <span class="hljs-function">(<span class="hljs-params">obj, ...keys</span>) =&gt;</span> {
+	<span class="hljs-keyword">return</span> keys.reduce(<span class="hljs-function">(<span class="hljs-params">acc, key</span>) =&gt;</span> {
+		<span class="hljs-keyword">if</span> (obj.hasOwnProperty(key)) {
+			acc[key] = obj[key];
+		}
+		<span class="hljs-keyword">return</span> acc;
+	}, {});
+};</pre></div>
+        
+      
+        
+        <p>This function builds the main configuration object.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> configure = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">options</span>) </span>{</pre></div>
+        
+      
+        
+        <p>First we set up the base config object.
+We use the defaults and then any keys from defaults that are in the options object.</p>
+
+        
+          <div class='highlight'><pre>	<span class="hljs-keyword">const</span> config = {
+		...defaults,
+		...pick(options, ...Object.keys(defaults))
+	};</pre></div>
+        
+      
+        
+        <p>The user is able to override the layout file used with the <code>--template</code> parameter.
+In this case, it is also neccessary to explicitly specify a stylesheet file.
+These custom templates are compiled exactly like the predefined ones, but the <code>public</code> folder
+is only copied for the latter.</p>
+
+        
+          <div class='highlight'><pre>	<span class="hljs-keyword">if</span> (options.template) {</pre></div>
+        
+      
+        
+        <p>If a custom template was provided we will use it but usually
+we expect a custom css file too. However there is no <em>requirement</em> for this.</p>
+
+        
+          <div class='highlight'><pre>		<span class="hljs-keyword">if</span> (!options.css) {
+			global.console.warn(<span class="hljs-string">"docco: have a template but no stylesheet file specified."</span>);
+		}</pre></div>
+        
+      
+        
+        <p>Templates take precidence, so if we’re using a template there is no layout.
+Lets make sure of that.</p>
+
+        
+          <div class='highlight'><pre>		config.layout = <span class="hljs-literal">null</span>;
+	} <span class="hljs-keyword">else</span> {</pre></div>
+        
+      
+        
+        <p>We’re using a layout. So lets save the layout name before moving on.</p>
+
+        
+          <div class='highlight'><pre>		config.layoutname = config.layout;
+		<span class="hljs-keyword">const</span> dir = config.layout = path.join(__dirname, <span class="hljs-string">"../resources"</span>, config.layout);</pre></div>
+        
+      
+        
+        <p>If the layout has a public directory (for resources like css, images, etc) lets set that.</p>
+
+        
+          <div class='highlight'><pre>		<span class="hljs-keyword">if</span> (fs.existsSync(path.join(dir, <span class="hljs-string">"public"</span>))) {
+			config.public = path.join(dir, <span class="hljs-string">"public"</span>);
+		}</pre></div>
+        
+      
+        
+        <p>Templates are always named the same thing.</p>
+
+        
+          <div class='highlight'><pre>		config.template = path.join(dir, <span class="hljs-string">"docco.jst"</span>);</pre></div>
+        
+      
+        
+        <p>Note that a custom css file can be provided to override the layouts own.</p>
+
+        
+          <div class='highlight'><pre>		config.css = options.css || path.join(dir, <span class="hljs-string">"docco.css"</span>);
+	}</pre></div>
+        
+      
+        
+        <p>Now we try to load everything we set up above.</p>
+
+        
+          <div class='highlight'><pre>	<span class="hljs-keyword">try</span> {
+		config.template = template(fs.readFileSync(config.template).toString());
+	} <span class="hljs-keyword">catch</span> (err) {
+		global.console.warn(<span class="hljs-string">`docco: could not load layout template "<span class="hljs-subst">${config.layoutname || config.template}</span>"`</span>);
+		config.template = <span class="hljs-literal">false</span>;
+	}</pre></div>
+        
+      
+        
+        <p>If we’re using custom markdown options we load those from a file now.</p>
+
+        
+          <div class='highlight'><pre>	<span class="hljs-keyword">if</span> (options.marked) {
+		config.marked = <span class="hljs-built_in">JSON</span>.parse(fs.readFileSync(options.marked));
+	}</pre></div>
+        
+      
+        
+        <p>We only support what we can read.
+If docco is called with <code>docco *.*</code> we don’t want to try to read <code>.gif</code> files or something.
+So lets filter out those langauges we don’t support.
+Want to add a language? <a href="https://github.com/abritinthebay/docco-es">Submit a PR</a>!</p>
+
+        
+          <div class='highlight'><pre>	config.sources = <span class="hljs-built_in">Array</span>.isArray(options.args) ? options.args.filter(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">source</span>) </span>{
+		<span class="hljs-keyword">const</span> lang = getLanguage(source, config);
+		<span class="hljs-keyword">if</span> (!lang &amp;&amp; config.verbose) {
+			global.console.warn(<span class="hljs-string">`docco: skipped unknown type (<span class="hljs-subst">${path.basename(source)}</span>)`</span>);
+		}
+		<span class="hljs-keyword">return</span> lang;
+	}).sort() : [];</pre></div>
+        
+      
+        
+        <p>We’re done! Return the completed configuration object.</p>
+
+        
+          <div class='highlight'><pre>	<span class="hljs-keyword">return</span> config;
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> configure;</pre></div>
+        
+      
+      <div class="fleur">h</div>
+    </div>
+  </div>
+</body>
+</html>

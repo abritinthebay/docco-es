@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>The Core Code</title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="page">
+
+      <div class="header">
+        
+          
+          <h1 id="the-core-code">The Core Code</h1>
+<p>This file sets up the core API for the application.
+First we require our internal dependencies.</p>
+
+          
+            <div class='highlight'><pre><span class="hljs-keyword">import</span> parse <span class="hljs-keyword">from</span> <span class="hljs-string">"./parse"</span>;
+<span class="hljs-keyword">import</span> format <span class="hljs-keyword">from</span> <span class="hljs-string">"./format"</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-built_in">document</span> <span class="hljs-keyword">from</span> <span class="hljs-string">"./document"</span>;
+<span class="hljs-keyword">import</span> cli <span class="hljs-keyword">from</span> <span class="hljs-string">"./cli"</span>;
+<span class="hljs-keyword">import</span> {version} <span class="hljs-keyword">from</span> <span class="hljs-string">"./cli"</span>;</pre></div>
+          
+        
+
+        
+          <div class="toc">
+            <h3>Table of Contents</h3>
+            <ol>
+              
+                
+                <li>
+                  <a class="source" href="cli.html">
+                    lib/cli.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="configure.html">
+                    lib/configure.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="defaults.html">
+                    lib/defaults.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="docco.html">
+                    lib/docco.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="document.html">
+                    lib/document.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="format.html">
+                    lib/format.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="index.html">
+                    lib/index.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="languages.html">
+                    lib/languages.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="parse.html">
+                    lib/parse.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="write.html">
+                    lib/write.js
+                  </a>
+                </li>
+              
+            </ol>
+          </div>
+        
+      </div>
+
+      
+        
+        <p>Then we export our public API.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+	<span class="hljs-built_in">document</span>,
+	format,
+	parse,
+	cli,
+	version
+};</pre></div>
+        
+      
+        
+        <p>Also export these as named exports</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">export</span> {
+	<span class="hljs-built_in">document</span>,
+	format,
+	parse,
+	cli,
+	version
+};</pre></div>
+        
+      
+        
+        <p>The core function called by the CLI is, unsurprisingly, called <code>cli</code>.
+However with it (and the other functions) you can programatically use docco.</p>
+
+        
+      
+      <div class="fleur">h</div>
+    </div>
+  </div>
+</body>
+</html>

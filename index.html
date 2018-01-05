@@ -2,105 +2,105 @@
 
 <html>
 <head>
-  <title>The Core Code</title>
+  <title>Docco</title>
   <meta charset="UTF-8">
-  <link rel="stylesheet" media="all" href="docs/public/stylesheets/normalize.css" />
-  <link rel="stylesheet" media="all" href="docs/docco.css" />
+  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
+  <link rel="stylesheet" media="all" href="docco.css" />
 </head>
 <body>
   <div class="container">
     <div class="page">
 
       <div class="header">
-
-
+        
+          
           <h1 id="docco">Docco</h1>
 
+          
+        
 
-
-
-
+        
           <div class="toc">
             <h3>Table of Contents</h3>
             <ol>
-
-
+              
+                
                 <li>
-                  <a class="source" href="docs/lib/cli.html">
+                  <a class="source" href="cli.html">
                     lib/cli.js
                   </a>
                 </li>
-
-
+              
+                
                 <li>
-                  <a class="source" href="docs/lib/configure.html">
+                  <a class="source" href="configure.html">
                     lib/configure.js
                   </a>
                 </li>
-
-
+              
+                
                 <li>
-                  <a class="source" href="docs/lib/defaults.html">
+                  <a class="source" href="defaults.html">
                     lib/defaults.js
                   </a>
                 </li>
-
-
+              
+                
                 <li>
-                  <a class="source" href="docs/lib/docco.html">
+                  <a class="source" href="docco.html">
                     lib/docco.js
                   </a>
                 </li>
-
-
+              
+                
                 <li>
-                  <a class="source" href="docs/lib/document.html">
+                  <a class="source" href="document.html">
                     lib/document.js
                   </a>
                 </li>
-
-
+              
+                
                 <li>
-                  <a class="source" href="docs/lib/format.html">
+                  <a class="source" href="format.html">
                     lib/format.js
                   </a>
                 </li>
-
-
+              
+                
                 <li>
-                  <a class="source" href="docs/lib/index.html">
+                  <a class="source" href="index.html">
                     lib/index.js
                   </a>
                 </li>
-
-
+              
+                
                 <li>
-                  <a class="source" href="docs/lib/languages.html">
+                  <a class="source" href="languages.html">
                     lib/languages.js
                   </a>
                 </li>
-
-
+              
+                
                 <li>
-                  <a class="source" href="docs/lib/parse.html">
+                  <a class="source" href="parse.html">
                     lib/parse.js
                   </a>
                 </li>
-
-
+              
+                
                 <li>
-                  <a class="source" href="docs/lib/write.html">
+                  <a class="source" href="write.html">
                     lib/write.js
                   </a>
                 </li>
-
+              
             </ol>
           </div>
-
+        
       </div>
 
-
-
+      
+        
         <p><strong>Docco-ES</strong> is a quick-and-simple documentation generator, written in
 <a href="https://babeljs.io/learn-es2015/">modern, ES2015+, JavaScript</a>.</p>
 <p>It produces an HTML document that displays your comments intermingled with your
@@ -110,35 +110,35 @@ passed through <a href="http://highlightjs.org/">Highlight.js</a> for syntax hig
 <p>This page is actually the result of running Docco against its own
 <a href="https://github.com/abritinthebay/docco-es/blob/master/docco.js">source file</a>.</p>
 
-
-
-
+        
+      
+        
         <ol>
 <li>Install Docco with <strong>npm</strong>: <code>npm install -g docco</code></li>
 <li>Run it against your code: <code>docco src/*.js</code></li>
 </ol>
 
-
-
-
+        
+      
+        
         <p>There is no Step 3.</p>
 
-
-
-
+        
+      
+        
         <p>This will generate an HTML page for each of the named
 source files, with a menu linking to the other pages, saving the whole mess
 into a <code>docs</code> folder (configurable).</p>
 
-
-
-
+        
+      
+        
         <p>The <a href="http://github.com/abritinthebay/docco-es">Docco-ES source</a> is available on GitHub,
 and is released under the MIT License.</p>
 
-
-
-
+        
+      
+        
         <p>Docco can be used to process code written in any programming language. If it
 doesn’t handle your favorite yet, feel free to
 <a href="https://github.com/abritinthebay/docco-es/blob/master/resources/languages.json">add it to the list</a>.
@@ -146,18 +146,18 @@ Finally, the <a href="http://coffeescript.org/#literate">“literate” style</a
 language is also supported — just tack an <code>.md</code> extension on the end:
 <code>.js.md</code>, <code>.py.md</code>, and so on.</p>
 
-
-
-
+        
+      
+        
         <h2 id="partners-in-crime-">Partners in Crime:</h2>
 <p>Docco-ES is based on the excellent work of Jeremy Ashkenas who wrote the <a href="https://github.com/jashkenas/docco">original Docco</a>
 in CoffeeScript. This fork was created to add features and to work with modern JS technologies
 and language features that didn’t exist when it was original written or that
 CoffeeScript does not support.</p>
 
-
-
-
+        
+      
+        
         <h2 id="how-we-generation-documentation">How We Generation Documentation</h2>
 <p>We generate the documentation for our configured source file(s) by:</p>
 <ul>
@@ -168,19 +168,19 @@ CoffeeScript does not support.</p>
 <li>printing them out in a template</li>
 </ul>
 
-
-
-
+        
+      
+        
         <p>This is the index file so it mostly just sets up the code to run.
 In this case we want to use ESModules, so are enabling that,
 then we export the default export of the core <code>docco.js</code> file.
 For a more in-depth look at the code in the other files.</p>
 
-
+        
           <div class='highlight'><pre><span class="hljs-built_in">require</span> = <span class="hljs-built_in">require</span>(<span class="hljs-string">"@std/esm"</span>)(<span class="hljs-built_in">module</span>);
 <span class="hljs-built_in">module</span>.exports = <span class="hljs-built_in">require</span>(<span class="hljs-string">"./docco.js"</span>).default;</pre></div>
-
-
+        
+      
       <div class="fleur">h</div>
     </div>
   </div>

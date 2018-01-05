@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>write.js</title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="page">
+
+      <div class="header">
+        
+          <h1>write.js</h1>
+        
+
+        
+          <div class="toc">
+            <h3>Table of Contents</h3>
+            <ol>
+              
+                
+                <li>
+                  <a class="source" href="cli.html">
+                    lib/cli.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="configure.html">
+                    lib/configure.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="defaults.html">
+                    lib/defaults.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="docco.html">
+                    lib/docco.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="document.html">
+                    lib/document.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="format.html">
+                    lib/format.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="index.html">
+                    lib/index.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="languages.html">
+                    lib/languages.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="parse.html">
+                    lib/parse.js
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="write.html">
+                    lib/write.js
+                  </a>
+                </li>
+              
+            </ol>
+          </div>
+        
+      </div>
+
+      
+        
+        
+        
+          <div class='highlight'><pre><span class="hljs-keyword">import</span> fs <span class="hljs-keyword">from</span> <span class="hljs-string">"fs-extra"</span>;
+<span class="hljs-keyword">import</span> path <span class="hljs-keyword">from</span> <span class="hljs-string">"path"</span>;
+<span class="hljs-keyword">import</span> marked <span class="hljs-keyword">from</span> <span class="hljs-string">"marked"</span>;
+
+<span class="hljs-keyword">import</span> {getLanguage} <span class="hljs-keyword">from</span> <span class="hljs-string">"./languages"</span>;</pre></div>
+        
+      
+        
+        <p>Once all of the code has finished highlighting, we can <strong>write</strong> the resulting
+documentation file by passing the completed HTML sections into the template,
+and rendering it to the specified output path.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> write = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">source, sections, config</span>) </span>{
+	<span class="hljs-keyword">const</span> destination = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">file</span>) </span>{
+		<span class="hljs-keyword">const</span> lang = getLanguage(source, config);
+		<span class="hljs-keyword">const</span> ext = lang &amp;&amp; lang.name === <span class="hljs-string">"markdown"</span> ? <span class="hljs-string">"md"</span> : <span class="hljs-string">"html"</span>;
+		<span class="hljs-keyword">return</span> path.join(config.output, path.dirname(file), <span class="hljs-string">`<span class="hljs-subst">${path.basename(file, path.extname(file)) }</span>.<span class="hljs-subst">${ext}</span>`</span>);
+	};
+	<span class="hljs-keyword">const</span> relative = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">file</span>) </span>{
+		<span class="hljs-keyword">const</span> to = path.dirname(path.resolve(file));
+		<span class="hljs-keyword">const</span> <span class="hljs-keyword">from</span> = path.dirname(path.resolve(destination(source)));
+		<span class="hljs-keyword">return</span> path.join(path.relative(<span class="hljs-keyword">from</span>, to), path.basename(file));
+	};</pre></div>
+        
+      
+        
+        <p>The <strong>title</strong> of the file is either the first heading in the prose, or the
+name of the source file.</p>
+
+        
+          <div class='highlight'><pre>	<span class="hljs-keyword">const</span> firstSection = sections.find(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">section</span>) </span>{
+		<span class="hljs-keyword">return</span> section.docsText &amp;&amp; section.docsText.length &gt; <span class="hljs-number">0</span>;
+	});
+	<span class="hljs-keyword">const</span> first = firstSection ? marked.lexer(firstSection.docsText)[<span class="hljs-number">0</span>] : {};
+	<span class="hljs-keyword">const</span> hasTitle = first.type === <span class="hljs-string">"heading"</span> &amp;&amp; first.depth === <span class="hljs-number">1</span>;
+	<span class="hljs-keyword">const</span> title = hasTitle ? first.text : path.basename(source);
+	<span class="hljs-keyword">const</span> css = relative(path.join(config.output, path.basename(config.css)));
+	<span class="hljs-keyword">const</span> language = getLanguage(source, config);
+	<span class="hljs-keyword">const</span> sources = config.sources;</pre></div>
+        
+      
+        
+        <p>If we have a template function then use it otherwise we’ll have no output.</p>
+
+        
+          <div class='highlight'><pre>	<span class="hljs-keyword">const</span> output = <span class="hljs-keyword">typeof</span> config.template === <span class="hljs-string">"function"</span> ? config.template({
+		css,
+		destination,
+		hasTitle,
+		language,
+		path,
+		relative,
+		sections,
+		sources,
+		title
+	}) : <span class="hljs-literal">false</span>;
+
+	<span class="hljs-keyword">if</span> (output) {
+		<span class="hljs-keyword">if</span> (config.verbose) {
+			global.console.log(<span class="hljs-string">`docco: <span class="hljs-subst">${source}</span> -&gt; <span class="hljs-subst">${destination(source)}</span>`</span>);
+		}
+		<span class="hljs-keyword">return</span> fs.outputFileSync(destination(source), output);
+	}
+	<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> write;</pre></div>
+        
+      
+      <div class="fleur">h</div>
+    </div>
+  </div>
+</body>
+</html>

@@ -36,7 +36,8 @@
 	},
 	"scripts": {
 		"test": "jest --coverage --forceExit",
-		"docs": "docco lib/*.js -l linear && cp ./docs/lib/index.html ./index.html",
+		"docs": "docco lib/*.js -l linear && cp -r ./docs/lib/ ./",
+		"postdocs": "grep -rl ../docco.css *.html | xargs sed -i '' 's/..\\/docco.css/docco.css/g'",
 		"posttest": "coveralls < coverage/lcov.info"
 	},
 	"@std/esm": {
