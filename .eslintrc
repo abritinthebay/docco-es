@@ -152,7 +152,8 @@
 			"args" : "all",
 			"argsIgnorePattern" : "^_",
 			"caughtErrors" : "all",
-			"vars" : "all"
+			"vars" : "all",
+			"varsIgnorePattern": "^_"
 		}],
 		"no-use-before-define" : 2,
 		"no-useless-call" : 2,
