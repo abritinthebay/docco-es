@@ -4,19 +4,31 @@ import commander from "commander";
 import toBeType from "jest-tobetype";
 expect.extend(toBeType);
 
-jest.mock("fs");
-const fs = require("fs");
-fs.readFileSync.mockImplementation((...args) => {
+const dummyLanguages = {
+	// The first two are for languages parsing (markdown is a special case)
+	".js": {"name": "javascript", "symbol": "//"},
+	".md": {"name": "markdown", "symbol": "//"},
+	// This is for the cli tests (as we load files, but is fine for languages parsing)
+	"version": "foo"
+};
+const readFileMock = (...args) => {
 	if (args[0] === "foo.jst") {
-		// it's the template call in configure, so we throw.
+		// We're in the template call in Configure, so we throw to test.
 		throw new Error("nope");
 	}
-	return JSON.stringify({
-		".js": {"name": "javascript", "symbol": "//"}, // for languages file
-		"version": "foo" // for the cli (but works with languages file)
-	});
-});
+	return JSON.stringify(dummyLanguages);
+};
+
+jest.mock("fs-extra");
+const fs = require("fs-extra");
+fs.readFileSync.mockImplementation(readFileMock);
 fs.existsSync.mockReturnValue(true); // for configure
+
+jest.mock("marked");
+const marked = require("marked");
+
+jest.mock("highlight.js");
+const highlight = require("highlight.js");
 
 const docco = require("../lib/docco");
 const cli = require("../lib/cli");
@@ -24,6 +36,7 @@ const configure = require("../lib/configure");
 const format = require("../lib/format");
 const parse = require("../lib/parse");
 const languages = require("../lib/languages");
+const write = require("../lib/write");
 
 describe("Public API", () => {
 	it("is defined correctly", () => {
@@ -99,6 +112,89 @@ describe("Format", () => {
 	});
 	it("runs without erroring", () => {
 		expect(format.format).not.toThrow();
+		const result = format.format();
+		expect(result).toBeType("array");
+		expect(result.length).toBe(0);
+	});
+	it("processes sections correctly", () => {
+		marked.mockImplementationOnce((text) => `<p>${text}</p>`);
+		const sections = [
+			{codeText: "foo", docsText: "bar"}
+		];
+		const result = format.format("test.js", sections);
+		expect(result).toBeType("array");
+		expect(result.length).toBe(1);
+		expect(result[0]).toMatchObject({
+			codeText: "foo",
+			docsText: "bar",
+			codeHtml: "<div class=\"highlight\"><pre>foo</pre></div>",
+			docsHtml: "<p>bar</p>"
+		});
+		marked.mockClear();
+	});
+	it("handles exceptions correctly", () => {
+		highlight.highlight.mockImplementationOnce(() => {
+			throw new Error("splode");
+		});
+		marked.mockImplementation((text) => `<p>${text}</p>`);
+		const sections = [
+			{codeText: "foo", docsText: "bar"}
+		];
+		expect(() => format.format("test.js", sections)).not.toThrow();
+		const result = format.format("test.js", sections);
+		expect(result).toBeType("array");
+		expect(result.length).toBe(1);
+
+		highlight.highlight.mockImplementationOnce(() => {
+			throw new Error("splode");
+		});
+		expect(() => format.format("test.js", sections, {throw: true})).toThrow();
+
+		marked.mockClear();
+		highlight.highlight.mockClear();
+	});
+	it("sets markdown highlighter correctly", () => {
+		const restoreConsole = mockConsole("warn");
+		let options, result;
+		marked.setOptions.mockImplementation((opts) => {
+			options = opts;
+		});
+		const sections = [
+			{codeText: "foo", docsText: "bar"}
+		];
+
+		highlight.getLanguage.mockImplementationOnce(() => {
+			return false;
+		});
+
+		format.format("test.js", sections);
+		expect(options).toBeType("object");
+		expect(options.highlight).toBeType("function");
+
+		result = options.highlight("foo");
+		expect(result).toBe("foo");
+		expect(global.console.warn).toHaveBeenCalledTimes(1);
+		global.console.warn.mockClear();
+		highlight.highlight.mockClear();
+		highlight.getLanguage.mockClear();
+
+		highlight.getLanguage.mockImplementationOnce(() => {
+			return true;
+		});
+		highlight.highlight.mockImplementation((_lang, _code) => {
+			return {value: "bar"};
+		});
+		format.format("test.js", sections);
+		expect(options).toBeType("object");
+		expect(options.highlight).toBeType("function");
+
+		result = options.highlight("foo");
+		expect(result).toBe("bar");
+		expect(global.console.warn).not.toHaveBeenCalled();
+
+		highlight.highlight.mockClear();
+		highlight.getLanguage.mockClear();
+		restoreConsole();
 	});
 });
 
@@ -147,7 +243,7 @@ describe("CLI", () => {
 	});
 });
 
-describe("", () => {
+describe("Languages", () => {
 	it("has the correct exports", () => {
 		expect(languages.default).toBeUndefined();
 		expect(languages.languages).toBeDefined();
@@ -175,22 +271,195 @@ describe("", () => {
 		expect(lang.name).toBe("qux");
 	});
 	it("can detect literate versions of code correctly", () => {
-		let lang = languages.getLanguage("foo.bar.md", {
-			languages: {
-				".bar": {"name": "qux"},
-				".md": {"name": "markdown"}
-			}
+		let lang = languages.getLanguage("foo.js.md", {
+			languages: dummyLanguages
 		});
-		expect(lang.name).toBe("qux");
+		expect(lang.name).toBe("javascript");
 		expect(lang.literate).toBe(true);
 		lang = languages.getLanguage("foo.md", {
-			languages: {
-				".bar": {"name": "qux"},
-				".md": {"name": "markdown"}
-			}
+			languages: dummyLanguages
 		});
 		expect(lang.name).toBe("markdown");
 		expect(lang.literate).toBeUndefined();
 	});
+});
 
+describe("Write", () => {
+	it("is defined correctly", () => {
+		expect(write.write).toEqual(write.default);
+		expect(write).toMatchObject({
+			write: expect.any(Function),
+			destinationFactory: expect.any(Function),
+			relativeFactory: expect.any(Function),
+			sectionTest: expect.any(Function)
+		});
+	});
+	it("returns functions from Factories", () => {
+		expect(write.destinationFactory()).toBeType("function");
+		expect(write.relativeFactory()).toBeType("function");
+	});
+	it("can get the destination from source file", () => {
+		const foo = write.destinationFactory("bar.js", {output: "foo", languages: dummyLanguages});
+		expect(foo("bar.js")).toBe("foo/bar.html");
+		const bar = write.destinationFactory("qux.md", {output: "foo", languages: dummyLanguages});
+		expect(bar("qux.md")).toBe("foo/qux.md");
+	});
+	it("can get the relative info from source file", () => {
+		const bar = write.destinationFactory("bar.js", {output: "foo", languages: dummyLanguages});
+		const foo = write.relativeFactory("bar.js", bar);
+		expect(foo("bar.js")).toBe("../bar.js");
+	});
+	it("can check a section for validity", () => {
+		expect(write.sectionTest("foo")).toBe(false);
+		expect(write.sectionTest({})).toBe(false);
+		expect(write.sectionTest({docsText: ""})).toBe(false);
+		expect(write.sectionTest({docsText: "something"})).toBe(true);
+	});
+	it("produces no output when no template is present", () => {
+		const restoreConsole = mockConsole("log");
+		const config = {
+			output: "foo",
+			languages: dummyLanguages
+		};
+		write.write("bar.js", [{}], config);
+		expect(global.console.log).toHaveBeenCalledTimes(0);
+		expect(fs.outputFileSync).toHaveBeenCalledTimes(0);
+		restoreConsole();
+	});
+	it("produces basic output", () => {
+		const restoreConsole = mockConsole("log");
+		const config = {
+			output: "foo",
+			languages: dummyLanguages,
+			template: jest.fn().mockImplementation(() => {
+				return "dummy output";
+			})
+		};
+		write.write("bar.js", [{}], config);
+		expect(global.console.log).toHaveBeenCalledTimes(0);
+		expect(config.template).toHaveBeenCalledTimes(1);
+		expect(fs.outputFileSync).toHaveBeenCalledTimes(1);
+		restoreConsole();
+		fs.outputFileSync.mockClear();
+	});
+	it("produces no output when dryrun is set", () => {
+		const restoreConsole = mockConsole("log");
+		const config = {
+			output: "foo",
+			languages: dummyLanguages,
+			template: jest.fn().mockImplementation(() => {
+				return "dummy output";
+			}),
+			dryrun: true
+		};
+		write.write("bar.js", [{}], config);
+		expect(global.console.log).toHaveBeenCalledTimes(0);
+		expect(config.template).toHaveBeenCalledTimes(1);
+		expect(fs.outputFileSync).toHaveBeenCalledTimes(0);
+		restoreConsole();
+		fs.outputFileSync.mockClear();
+	});
+	it("logs debug data when verbose is set", () => {
+		const restoreConsole = mockConsole("log");
+		const config = {
+			output: "foo",
+			languages: dummyLanguages,
+			template: jest.fn().mockImplementation(() => {
+				return "dummy output";
+			}),
+			verbose: true
+		};
+		write.write("bar.js", [{}], config);
+		expect(global.console.log).toHaveBeenCalledTimes(1);
+		expect(config.template).toHaveBeenCalledTimes(1);
+		expect(fs.outputFileSync).toHaveBeenCalledTimes(1);
+		restoreConsole();
+		fs.outputFileSync.mockClear();
+	});
+	it("processes with markdown if section text present", () => {
+		const restoreConsole = mockConsole("log");
+		marked.lexer.mockImplementationOnce((text) => {
+			return [{depth: 1, text}];
+		});
+		const config = {
+			output: "foo",
+			languages: dummyLanguages,
+			template: jest.fn().mockImplementation(() => {
+				return "dummy output";
+			})
+		};
+		write.write("bar.js", [{docsText: "foo"}], config);
+		const lastTemplateCallArgs = config.template.mock.calls[config.template.mock.calls.length - 1];
+
+		expect(global.console.log).toHaveBeenCalledTimes(0);
+		expect(config.template).toHaveBeenCalledTimes(1);
+		expect(lastTemplateCallArgs[0]).toMatchObject({hasTitle: false});
+		expect(fs.outputFileSync).toHaveBeenCalledTimes(1);
+		expect(marked.lexer).toHaveBeenCalledTimes(1);
+
+		marked.lexer.mockClear();
+		config.template.mockClear();
+		fs.outputFileSync.mockClear();
+		restoreConsole();
+	});
+	it("processes markdown and sets a title correctly", () => {
+		const restoreConsole = mockConsole("log");
+		marked.lexer.mockImplementationOnce((text) => {
+			return [{depth: 1, type: "heading", text}];
+		});
+		const config = {
+			output: "foo",
+			languages: dummyLanguages,
+			template: jest.fn().mockImplementation(() => {
+				return "dummy output";
+			})
+		};
+		write.write("bar.js", [{docsText: "foo"}], config);
+		const lastTemplateCallArgs = config.template.mock.calls[config.template.mock.calls.length - 1];
+
+		expect(global.console.log).toHaveBeenCalledTimes(0);
+		expect(config.template).toHaveBeenCalledTimes(1);
+		expect(lastTemplateCallArgs[0]).toMatchObject({hasTitle: true, title: "foo"});
+		expect(fs.outputFileSync).toHaveBeenCalledTimes(1);
+		expect(marked.lexer).toHaveBeenCalledTimes(1);
+
+		marked.lexer.mockClear();
+		config.template.mockClear();
+		fs.outputFileSync.mockClear();
+		restoreConsole();
+	});
+	it("uses css if present", () => {
+		const config = {
+			output: "foo",
+			languages: dummyLanguages,
+			template: jest.fn().mockImplementation(() => {
+				return "dummy output";
+			}),
+			css: "foo.css"
+		};
+		marked.lexer.mockImplementationOnce((text) => {
+			return [{depth: 1, type: "heading", text}];
+		});
+		write.write("bar.js", [{docsText: "foo"}], config);
+
+		const lastTemplateCallArgs = config.template.mock.calls[config.template.mock.calls.length - 1];
+		expect(lastTemplateCallArgs[0]).toMatchObject({css: "foo.css"});
+	});
+	it("uses styles if present", () => {
+		const config = {
+			output: "foo",
+			languages: dummyLanguages,
+			template: jest.fn().mockImplementation(() => {
+				return "dummy output";
+			}),
+			styles: "bar"
+		};
+		marked.lexer.mockImplementationOnce((text) => {
+			return [{depth: 1, type: "heading", text}];
+		});
+		write.write("bar.js", [{docsText: "foo"}], config);
+
+		const lastTemplateCallArgs = config.template.mock.calls[config.template.mock.calls.length - 1];
+		expect(lastTemplateCallArgs[0]).toMatchObject({styles: "bar"});
+	});
 });
