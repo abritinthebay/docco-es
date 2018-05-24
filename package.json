@@ -39,7 +39,7 @@
 		"test": "jest --coverage --forceExit",
 		"lint": "eslint lib/",
 		"lint:fix": "eslint --fix lib/",
-		"docs": "docco lib/*.js -l linear && cp -r ./docs/lib/ ./",
+		"docs": "./bin/docco lib/*.js -l linear && cp -r ./docs/lib/ ./",
 		"postdocs": "grep -rl ../docco.css *.html | xargs sed -i '' 's/..\\/docco.css/docs\\/docco.css/g'",
 		"posttest": "coveralls < coverage/lcov.info"
 	},
