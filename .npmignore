@@ -1,3 +1,11 @@
 .DS_Store
 .git*
+.babelrc
+.coveralls.yml
+.gitignore
+.eslintrc
 index.html
+coverage/
+docs/
+__tests__/
+.circleci/
